@@ -1,6 +1,8 @@
 package ru.csc.bdse.datasource;
 
 import com.sleepycat.je.*;
+import com.sleepycat.persist.EntityStore;
+import com.sleepycat.persist.StoreConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.csc.bdse.ApplicationProperties;
@@ -15,7 +17,7 @@ import java.nio.file.Paths;
 public class BerkleyDataSource {
 
     private Environment dbEnvironment = null;
-    private Database database = null;
+    private EntityStore store;
 
     @Autowired
     BerkleyDataSource(ApplicationProperties applicationProperties) {
@@ -37,9 +39,10 @@ public class BerkleyDataSource {
             EnvironmentConfig environmentConfig = new EnvironmentConfig();
             environmentConfig.setAllowCreate(true);
             dbEnvironment = new Environment(new File(dbFilename), environmentConfig);
-            DatabaseConfig dbConfig = new DatabaseConfig();
-            dbConfig.setAllowCreate(true);
-            database = dbEnvironment.openDatabase(null, "TestDatabase", dbConfig);
+            StoreConfig storeConfig = new StoreConfig();
+            storeConfig.setAllowCreate(true);
+            store = new EntityStore(dbEnvironment, "EntityStore", storeConfig);
+
         } catch (DatabaseException dbe) {
             System.out.println(dbe.toString());
         }
@@ -48,10 +51,9 @@ public class BerkleyDataSource {
     @PreDestroy
     private void destroy() {
         try {
-            if (database != null) {
-                database.close();
+            if (store != null) {
+                store.close();
             }
-
             if (dbEnvironment != null) {
                 dbEnvironment.close();
             }
@@ -61,8 +63,8 @@ public class BerkleyDataSource {
 
     }
 
-    public Database getDatabase() {
-        return database;
+    public EntityStore getStore() {
+        return store;
     }
 
     public Environment getDbEnvironment() {
