@@ -1,7 +1,9 @@
 package ru.csc.bdse.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.csc.bdse.datasource.BerkleyDataSource;
 import ru.csc.bdse.kv.KeyValueApi;
 import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
@@ -65,5 +67,14 @@ public class KeyValueApiController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handle(IllegalArgumentException e) {
         return Optional.ofNullable(e.getMessage()).orElse("");
+    }
+
+    @Autowired
+    BerkleyDataSource berkleyDataSource;
+
+    @RequestMapping(method = RequestMethod.GET, value = "/test")
+    public String getTest() {
+        return "";
+//        return berkleyDataSource.test();
     }
 }
