@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.csc.bdse.datasource.BerkleyDataSource;
+import ru.csc.bdse.kv.BerkleyKeyValueApi;
 import ru.csc.bdse.kv.InMemoryKeyValueApi;
 import ru.csc.bdse.kv.KeyValueApi;
 import ru.csc.bdse.util.Env;
@@ -26,8 +27,9 @@ public class Application {
     }
 
     @Bean
-    KeyValueApi node() {
+    @Autowired
+    KeyValueApi node(BerkleyKeyValueApi berkleyKeyValueApi) {
         String nodeName = Env.get(Env.KVNODE_NAME).orElseGet(Application::randomNodeName);
-        return new InMemoryKeyValueApi(nodeName);
+        return berkleyKeyValueApi;
     }
 }

@@ -3,14 +3,18 @@ package ru.csc.bdse.kv;
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ru.csc.bdse.datasource.BerkleyDataSource;
 import ru.csc.bdse.model.KeyValueRecord;
 
 import java.util.*;
 
+@Service()
 public class BerkleyKeyValueApi implements KeyValueApi {
     private BerkleyDataSource berkleyDataSource;
 
+    @Autowired
     BerkleyKeyValueApi(BerkleyDataSource berkleyDataSource) {
         this.berkleyDataSource = berkleyDataSource;
     }

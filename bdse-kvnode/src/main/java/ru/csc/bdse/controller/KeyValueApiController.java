@@ -1,9 +1,11 @@
 package ru.csc.bdse.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.csc.bdse.datasource.BerkleyDataSource;
+import ru.csc.bdse.kv.BerkleyKeyValueApi;
 import ru.csc.bdse.kv.KeyValueApi;
 import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
@@ -22,7 +24,8 @@ public class KeyValueApiController {
 
     private final KeyValueApi keyValueApi;
 
-    public KeyValueApiController(final KeyValueApi keyValueApi) {
+    @Autowired
+    public KeyValueApiController(final BerkleyKeyValueApi keyValueApi) {
         this.keyValueApi = keyValueApi;
     }
 
