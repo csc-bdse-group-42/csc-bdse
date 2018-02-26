@@ -9,6 +9,8 @@ public class KeyValueRecord {
     private String key;
     private byte[] data;
 
+    private KeyValueRecord() { }
+
     public KeyValueRecord(String key, byte[] data) {
         this.key = key;
         this.data = data;
