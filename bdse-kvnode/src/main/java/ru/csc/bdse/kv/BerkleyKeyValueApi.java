@@ -12,7 +12,7 @@ import java.util.*;
 
 @Service
 public class BerkleyKeyValueApi implements KeyValueApi {
-    private BerkleyDataSource berkleyDataSource;
+    private final BerkleyDataSource berkleyDataSource;
 
     @Autowired
     BerkleyKeyValueApi(BerkleyDataSource berkleyDataSource) {
@@ -21,7 +21,8 @@ public class BerkleyKeyValueApi implements KeyValueApi {
 
     private PrimaryIndex<String, KeyValueRecord> getPrimaryIndex() {
         EntityStore store = berkleyDataSource.getStore();
-        return store.getPrimaryIndex(String.class, KeyValueRecord.class);
+        PrimaryIndex<String, KeyValueRecord> primaryIndex = store.getPrimaryIndex(String.class, KeyValueRecord.class);
+        return primaryIndex;
     }
 
     /**
@@ -33,7 +34,8 @@ public class BerkleyKeyValueApi implements KeyValueApi {
     @Override
     public void put(String key, byte[] value) {
         KeyValueRecord record = new KeyValueRecord(key, value);
-        getPrimaryIndex().put(record);
+        PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
+        primaryIndex.put(record);
     }
 
     /**
@@ -43,7 +45,8 @@ public class BerkleyKeyValueApi implements KeyValueApi {
      */
     @Override
     public Optional<byte[]> get(String key) {
-        KeyValueRecord record = getPrimaryIndex().get(key);
+        PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
+        KeyValueRecord record = primaryIndex.get(key);
         if (record == null) {
             return Optional.empty();
         }
@@ -57,9 +60,10 @@ public class BerkleyKeyValueApi implements KeyValueApi {
      */
     @Override
     public Set<String> getKeys(String prefix) {
-        Set<String> keys = new TreeSet<>();
-        try (EntityCursor<KeyValueRecord> cursor = getPrimaryIndex().entities()) {
-            for (KeyValueRecord record: cursor) {
+        Set<String> keys = new HashSet<>();
+        PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
+        try (EntityCursor<KeyValueRecord> cursor = primaryIndex.entities()) {
+            for (KeyValueRecord record : cursor) {
                 if (record.getKey().startsWith(prefix)) {
                     keys.add(record.getKey());
                 }
@@ -75,8 +79,9 @@ public class BerkleyKeyValueApi implements KeyValueApi {
      */
     @Override
     public void delete(String key) {
-        try (EntityCursor<KeyValueRecord> cursor = getPrimaryIndex().entities()) {
-            for (KeyValueRecord record: cursor) {
+        PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
+        try (EntityCursor<KeyValueRecord> cursor = primaryIndex.entities()) {
+            for (KeyValueRecord record : cursor) {
                 if (record.getKey().equals(key)) {
                     cursor.delete();
                 }
@@ -100,6 +105,6 @@ public class BerkleyKeyValueApi implements KeyValueApi {
      */
     @Override
     public void action(String node, NodeAction action) {
-        throw new RuntimeException("action not implemented now");
+        throw new IllegalArgumentException("Action is not implemented now");
     }
 }
