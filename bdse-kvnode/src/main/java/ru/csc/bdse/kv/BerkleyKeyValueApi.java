@@ -1,9 +1,25 @@
 package ru.csc.bdse.kv;
 
-import java.util.Optional;
-import java.util.Set;
+import com.sleepycat.persist.EntityCursor;
+import com.sleepycat.persist.EntityStore;
+import com.sleepycat.persist.PrimaryIndex;
+import ru.csc.bdse.datasource.BerkleyDataSource;
+import ru.csc.bdse.model.KeyValueRecord;
 
-public class BerkleyKeyValueApi implements KeyValueApi{
+import java.util.*;
+
+public class BerkleyKeyValueApi implements KeyValueApi {
+    private BerkleyDataSource berkleyDataSource;
+
+    BerkleyKeyValueApi(BerkleyDataSource berkleyDataSource) {
+        this.berkleyDataSource = berkleyDataSource;
+    }
+
+    private PrimaryIndex<String, KeyValueRecord> getPrimaryIndex() {
+        EntityStore store = berkleyDataSource.getStore();
+        return store.getPrimaryIndex(String.class, KeyValueRecord.class);
+    }
+
     /**
      * Puts value to the storage by specified key.
      *
@@ -12,7 +28,8 @@ public class BerkleyKeyValueApi implements KeyValueApi{
      */
     @Override
     public void put(String key, byte[] value) {
-
+        KeyValueRecord record = new KeyValueRecord(key, value);
+        getPrimaryIndex().put(record);
     }
 
     /**
@@ -22,7 +39,11 @@ public class BerkleyKeyValueApi implements KeyValueApi{
      */
     @Override
     public Optional<byte[]> get(String key) {
-        return Optional.empty();
+        KeyValueRecord record = getPrimaryIndex().get(key);
+        if (record == null) {
+            return Optional.empty();
+        }
+        return Optional.of(record.getData());
     }
 
     /**
@@ -32,7 +53,15 @@ public class BerkleyKeyValueApi implements KeyValueApi{
      */
     @Override
     public Set<String> getKeys(String prefix) {
-        return null;
+        Set<String> keys = new TreeSet<>();
+        try (EntityCursor<KeyValueRecord> cursor = getPrimaryIndex().entities()) {
+            for (KeyValueRecord record: cursor) {
+                if (record.getKey().startsWith(prefix)) {
+                    keys.add(record.getKey());
+                }
+            }
+        }
+        return keys;
     }
 
     /**
@@ -42,7 +71,13 @@ public class BerkleyKeyValueApi implements KeyValueApi{
      */
     @Override
     public void delete(String key) {
-
+        try (EntityCursor<KeyValueRecord> cursor = getPrimaryIndex().entities()) {
+            for (KeyValueRecord record: cursor) {
+                if (record.getKey().equals(key)) {
+                    cursor.delete();
+                }
+            }
+        }
     }
 
     /**
@@ -50,7 +85,7 @@ public class BerkleyKeyValueApi implements KeyValueApi{
      */
     @Override
     public Set<NodeInfo> getInfo() {
-        return null;
+        return Collections.singleton(new NodeInfo(berkleyDataSource.getStore().getStoreName(), NodeStatus.UP));
     }
 
     /**
@@ -61,6 +96,6 @@ public class BerkleyKeyValueApi implements KeyValueApi{
      */
     @Override
     public void action(String node, NodeAction action) {
-
+        throw new RuntimeException("action not implemented now");
     }
 }
