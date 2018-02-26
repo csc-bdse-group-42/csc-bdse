@@ -21,11 +21,10 @@ import java.util.Set;
  */
 @RestController
 public class KeyValueApiController {
-
     private final KeyValueApi keyValueApi;
 
     @Autowired
-    public KeyValueApiController(final BerkleyKeyValueApi keyValueApi) {
+    public KeyValueApiController(final KeyValueApi keyValueApi) {
         this.keyValueApi = keyValueApi;
     }
 

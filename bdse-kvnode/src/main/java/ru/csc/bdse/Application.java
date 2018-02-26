@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.csc.bdse.datasource.BerkleyDataSource;
@@ -27,6 +28,7 @@ public class Application {
     }
 
     @Bean
+    @Primary
     @Autowired
     KeyValueApi node(BerkleyKeyValueApi berkleyKeyValueApi) {
         String nodeName = Env.get(Env.KVNODE_NAME).orElseGet(Application::randomNodeName);

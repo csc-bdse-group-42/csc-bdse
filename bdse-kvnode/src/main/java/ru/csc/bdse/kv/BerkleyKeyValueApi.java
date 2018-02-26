@@ -10,7 +10,7 @@ import ru.csc.bdse.model.KeyValueRecord;
 
 import java.util.*;
 
-@Service()
+@Service
 public class BerkleyKeyValueApi implements KeyValueApi {
     private BerkleyDataSource berkleyDataSource;
 
