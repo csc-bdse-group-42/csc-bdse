@@ -8,7 +8,10 @@ import org.springframework.stereotype.Service;
 import ru.csc.bdse.datasource.BerkleyDataSource;
 import ru.csc.bdse.model.KeyValueRecord;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class BerkleyKeyValueApi implements KeyValueApi {
@@ -23,15 +26,11 @@ public class BerkleyKeyValueApi implements KeyValueApi {
 
     private PrimaryIndex<String, KeyValueRecord> getPrimaryIndex() {
         EntityStore store = berkleyDataSource.getStore();
-        PrimaryIndex<String, KeyValueRecord> primaryIndex = store.getPrimaryIndex(String.class, KeyValueRecord.class);
-        return primaryIndex;
+        return store.getPrimaryIndex(String.class, KeyValueRecord.class);
     }
 
     /**
      * Puts value to the storage by specified key.
-     *
-     * @param key
-     * @param value
      */
     @Override
     public void put(String key, byte[] value) {
@@ -42,8 +41,6 @@ public class BerkleyKeyValueApi implements KeyValueApi {
 
     /**
      * Returns value associated with specified key.
-     *
-     * @param key
      */
     @Override
     public Optional<byte[]> get(String key) {
@@ -57,8 +54,6 @@ public class BerkleyKeyValueApi implements KeyValueApi {
 
     /**
      * Returns all keys with specified prefix.
-     *
-     * @param prefix
      */
     @Override
     public Set<String> getKeys(String prefix) {
@@ -76,8 +71,6 @@ public class BerkleyKeyValueApi implements KeyValueApi {
 
     /**
      * Deletes value associated with specified key from the storage.
-     *
-     * @param key
      */
     @Override
     public void delete(String key) {
@@ -101,9 +94,6 @@ public class BerkleyKeyValueApi implements KeyValueApi {
 
     /**
      * Do action on specified node.
-     *
-     * @param node
-     * @param action
      */
     @Override
     public void action(String node, NodeAction action) {

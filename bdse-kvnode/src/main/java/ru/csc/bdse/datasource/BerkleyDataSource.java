@@ -20,7 +20,7 @@ public class BerkleyDataSource {
     private EntityStore store;
 
     @Autowired
-    BerkleyDataSource(ApplicationProperties applicationProperties) {
+    public BerkleyDataSource(ApplicationProperties applicationProperties) {
         String dbFilename = applicationProperties.getDbfile();
 
         try{
