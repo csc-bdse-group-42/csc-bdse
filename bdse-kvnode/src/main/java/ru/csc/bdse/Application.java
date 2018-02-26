@@ -32,6 +32,7 @@ public class Application {
     @Autowired
     KeyValueApi node(BerkleyKeyValueApi berkleyKeyValueApi) {
         String nodeName = Env.get(Env.KVNODE_NAME).orElseGet(Application::randomNodeName);
+        berkleyKeyValueApi.setNodeName(nodeName);
         return berkleyKeyValueApi;
     }
 }

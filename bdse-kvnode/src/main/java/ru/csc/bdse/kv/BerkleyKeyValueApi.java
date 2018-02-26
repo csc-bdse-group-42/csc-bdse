@@ -13,9 +13,11 @@ import java.util.*;
 @Service
 public class BerkleyKeyValueApi implements KeyValueApi {
     private final BerkleyDataSource berkleyDataSource;
+    private String nodeName;
 
     @Autowired
     BerkleyKeyValueApi(BerkleyDataSource berkleyDataSource) {
+        this.nodeName = "UNKNOWN_NODE";
         this.berkleyDataSource = berkleyDataSource;
     }
 
@@ -94,7 +96,7 @@ public class BerkleyKeyValueApi implements KeyValueApi {
      */
     @Override
     public Set<NodeInfo> getInfo() {
-        return Collections.singleton(new NodeInfo(berkleyDataSource.getStore().getStoreName(), NodeStatus.UP));
+        return Collections.singleton(new NodeInfo(this.nodeName, NodeStatus.UP));
     }
 
     /**
@@ -106,5 +108,9 @@ public class BerkleyKeyValueApi implements KeyValueApi {
     @Override
     public void action(String node, NodeAction action) {
         throw new IllegalArgumentException("Action is not implemented now");
+    }
+
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
     }
 }
