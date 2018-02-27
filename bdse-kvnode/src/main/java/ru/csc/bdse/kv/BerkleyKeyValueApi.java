@@ -7,10 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.csc.bdse.datasource.BerkleyDataSource;
 import ru.csc.bdse.model.KeyValueRecord;
+import ru.csc.bdse.util.Require;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -34,6 +35,9 @@ public class BerkleyKeyValueApi implements KeyValueApi {
      */
     @Override
     public void put(String key, byte[] value) {
+        Require.nonNull(key, "null key");
+        Require.nonNull(value, "null value");
+
         KeyValueRecord record = new KeyValueRecord(key, value);
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
         primaryIndex.put(record);
@@ -44,6 +48,8 @@ public class BerkleyKeyValueApi implements KeyValueApi {
      */
     @Override
     public Optional<byte[]> get(String key) {
+        Require.nonNull(key, "null key");
+
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
         KeyValueRecord record = primaryIndex.get(key);
         if (record == null) {
@@ -74,6 +80,8 @@ public class BerkleyKeyValueApi implements KeyValueApi {
      */
     @Override
     public void delete(String key) {
+        Require.nonNull(key, "null key");
+
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
         try (EntityCursor<KeyValueRecord> cursor = primaryIndex.entities()) {
             for (KeyValueRecord record : cursor) {
