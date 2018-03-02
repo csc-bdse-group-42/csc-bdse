@@ -39,7 +39,16 @@ public class KeyValueApiHttpClientTest2 {
 
     @Test
     public void concurrentPuts() {
-        // TODO simultanious puts for the same key value
+        Runnable putter = () -> {
+            for (int i = 0; i < 100; ++i) {
+                this.api.put(String.valueOf(i), Thread.currentThread().getName().getBytes());
+            }
+        };
+        Thread[] threads = new Thread[10];
+        for (int i = 0; i < 10; ++i) {
+            threads[i] = new Thread(putter);
+            threads[i].start();
+        }
     }
 
     @Test
