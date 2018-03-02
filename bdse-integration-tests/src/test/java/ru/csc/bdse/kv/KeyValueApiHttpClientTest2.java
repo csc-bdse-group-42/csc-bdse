@@ -1,10 +1,12 @@
 package ru.csc.bdse.kv;
 
+import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import ru.csc.bdse.util.Env;
+import ru.csc.bdse.util.IllegalNodeStateException;
 
 import java.io.File;
 import java.time.Duration;
@@ -47,22 +49,37 @@ public class KeyValueApiHttpClientTest2 {
 
     @Test
     public void actionUpDown() {
-        //TODO test up/down actions
+        NodeInfo ni = this.api.getInfo().iterator().next();
+        Assert.assertEquals(ni.getStatus(), NodeStatus.UP);
+        // Down node and check
+        api.action(ni.getName(), NodeAction.DOWN);
+        ni = this.api.getInfo().iterator().next();
+        Assert.assertEquals(ni.getStatus(), NodeStatus.DOWN);
+        // Up node and check
+        api.action(ni.getName(), NodeAction.UP);
+        ni = this.api.getInfo().iterator().next();
+        Assert.assertEquals(ni.getStatus(), NodeStatus.UP);
     }
 
-    @Test
+    @Test(expected = IllegalNodeStateException.class)
     public void putWithStoppedNode() {
-        //TODO test put if node/container was stopped
+        NodeInfo ni = this.api.getInfo().iterator().next();
+        api.action(ni.getName(), NodeAction.DOWN);
+        api.put("Foo", "bar".getBytes());
     }
 
-    @Test
+    @Test(expected = IllegalNodeStateException.class)
     public void getWithStoppedNode() {
-        //TODO test get if node/container was stopped
+        NodeInfo ni = this.api.getInfo().iterator().next();
+        api.action(ni.getName(), NodeAction.DOWN);
+        api.put("Foo", "bar".getBytes());
     }
 
-    @Test
+    @Test(expected = IllegalNodeStateException.class)
     public void getKeysByPrefixWithStoppedNode() {
-        //TODO test getKeysByPrefix if node/container was stopped
+        NodeInfo ni = this.api.getInfo().iterator().next();
+        api.action(ni.getName(), NodeAction.DOWN);
+        api.getKeys("F");
     }
 
     @Test
