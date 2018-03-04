@@ -3,10 +3,10 @@ package ru.csc.bdse.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.csc.bdse.datasource.BerkleyDataSource;
 import ru.csc.bdse.kv.KeyValueApi;
 import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
+import ru.csc.bdse.util.IllegalNodeStateException;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -69,12 +69,9 @@ public class KeyValueApiController {
         return Optional.ofNullable(e.getMessage()).orElse("");
     }
 
-    @Autowired
-    BerkleyDataSource berkleyDataSource;
-
-    @RequestMapping(method = RequestMethod.GET, value = "/test")
-    public String getTest() {
-        return "";
-//        return berkleyDataSource.test();
+    @ExceptionHandler(IllegalNodeStateException.class)
+    @ResponseStatus(value = HttpStatus.SERVICE_UNAVAILABLE, reason = "IllegalNodeState")
+    public String handle(IllegalNodeStateException e) {
+        return Optional.ofNullable(e.getMessage()).orElse("IllegalNodeState");
     }
 }

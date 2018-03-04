@@ -8,6 +8,6 @@ public class BerkleyKeyValueApiTest extends AbstractKeyValueApiTest {
     protected KeyValueApi newKeyValueApi() {
         ApplicationProperties properties = new ApplicationProperties();
         properties.setDbfile("test.db");
-        return new BerkleyKeyValueApi(new BerkleyDataSource(properties));
+        return new BerkleyKeyValueApi(new BerkleyDataSource(properties), new NodeRepository());
     }
 }
