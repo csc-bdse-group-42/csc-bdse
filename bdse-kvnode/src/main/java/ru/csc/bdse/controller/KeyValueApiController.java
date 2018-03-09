@@ -1,10 +1,12 @@
 package ru.csc.bdse.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.csc.bdse.kv.KeyValueApi;
 import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
+import ru.csc.bdse.util.IllegalNodeStateException;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -17,9 +19,9 @@ import java.util.Set;
  */
 @RestController
 public class KeyValueApiController {
-
     private final KeyValueApi keyValueApi;
 
+    @Autowired
     public KeyValueApiController(final KeyValueApi keyValueApi) {
         this.keyValueApi = keyValueApi;
     }
@@ -65,5 +67,11 @@ public class KeyValueApiController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handle(IllegalArgumentException e) {
         return Optional.ofNullable(e.getMessage()).orElse("");
+    }
+
+    @ExceptionHandler(IllegalNodeStateException.class)
+    @ResponseStatus(value = HttpStatus.SERVICE_UNAVAILABLE, reason = "IllegalNodeState")
+    public String handle(IllegalNodeStateException e) {
+        return Optional.ofNullable(e.getMessage()).orElse("IllegalNodeState");
     }
 }

@@ -6,9 +6,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import ru.csc.bdse.util.Constants;
 import ru.csc.bdse.util.Encoding;
+import ru.csc.bdse.util.IllegalNodeStateException;
 import ru.csc.bdse.util.Require;
 
 import java.util.Arrays;
@@ -69,7 +71,11 @@ public class KeyValueApiHttpClient implements KeyValueApi {
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             return new HashSet<>(Arrays.asList(readAs(responseEntity.getBody(), String[].class)));
         } else {
-            throw new RuntimeException("Response error: " + responseEntity);
+            if (responseEntity.getStatusCode() == HttpStatus.SERVICE_UNAVAILABLE) {
+                throw new IllegalNodeStateException();
+            } else {
+                throw new RuntimeException("Response error: " + responseEntity);
+            }
         }
     }
 
@@ -97,7 +103,16 @@ public class KeyValueApiHttpClient implements KeyValueApi {
 
     @Override
     public void action(String node, NodeAction action) {
-        throw new RuntimeException("action not implemented now");
+        final String url = baseUrl + "/action/" + node + "/" + action.name();
+        final ResponseEntity<byte[]> responseEntity = request(url, HttpMethod.POST, null);
+
+        if (responseEntity.getStatusCode() == HttpStatus.SERVICE_UNAVAILABLE) {
+            throw new IllegalNodeStateException();
+        }
+
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            throw new RuntimeException("Response error: " + responseEntity);
+        }
     }
 
     private ResponseEntity<byte[]> request(final String url,
