@@ -40,7 +40,7 @@ public class KeyValueApiHttpClientTest2 {
 
     @Before
     public void initialize() {
-        this.api.action("DEFAULT", NodeAction.UP);
+        this.api.action("node-0", NodeAction.UP);
 
         for (String key : this.api.getKeys("")) {
             this.api.delete(key);
@@ -121,20 +121,20 @@ public class KeyValueApiHttpClientTest2 {
 
     @Test(expected = HttpServerErrorException.class)
     public void putWithStoppedNode() {
-        api.action("DEFAULT", NodeAction.DOWN);
+        api.action("node-0", NodeAction.DOWN);
         api.put("Foo", "bar".getBytes());
     }
 
     @Test(expected = HttpServerErrorException.class)
     public void getWithStoppedNode() {
         api.put("Foo", "bar".getBytes());
-        api.action("DEFAULT", NodeAction.DOWN);
+        api.action("node-0", NodeAction.DOWN);
         api.get("Foo");
     }
 
     @Test(expected = HttpServerErrorException.class)
     public void getKeysByPrefixWithStoppedNode() {
-        api.action("DEFAULT", NodeAction.DOWN);
+        api.action("node-0", NodeAction.DOWN);
         api.getKeys("F");
     }
 
