@@ -1,4 +1,4 @@
-package src.main.java.ru.csc.bdse.app;
+package ru.csc.bdse.app;
 
 import java.util.Set;
 
