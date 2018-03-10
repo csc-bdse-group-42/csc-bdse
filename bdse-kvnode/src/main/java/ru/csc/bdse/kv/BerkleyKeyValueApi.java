@@ -1,5 +1,6 @@
 package ru.csc.bdse.kv;
 
+import com.sleepycat.je.DatabaseException;
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
@@ -18,12 +19,12 @@ import java.util.Set;
 @Service
 public class BerkleyKeyValueApi implements KeyValueApi {
     private final BerkleyDataSource berkleyDataSource;
-    private NodeRepository nodeRepository;
+    private NodeInfo nodeInfo;
 
     @Autowired
-    BerkleyKeyValueApi(BerkleyDataSource berkleyDataSource, NodeRepository nodeRepository) {
-        this.nodeRepository = nodeRepository;
+    BerkleyKeyValueApi(BerkleyDataSource berkleyDataSource) {
         this.berkleyDataSource = berkleyDataSource;
+        this.nodeInfo = new NodeInfo("UNKNOWN", NodeStatus.UP);
     }
 
     private PrimaryIndex<String, KeyValueRecord> getPrimaryIndex() {
@@ -39,9 +40,7 @@ public class BerkleyKeyValueApi implements KeyValueApi {
         Require.nonNull(key, "null key");
         Require.nonNull(value, "null value");
 
-        if (nodeRepository.getNode().getStatus() == NodeStatus.DOWN) {
-            throw new IllegalNodeStateException("Operational node is down.");
-        }
+        this.checkNodeStatus();
 
         KeyValueRecord record = new KeyValueRecord(key, value);
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
@@ -55,9 +54,7 @@ public class BerkleyKeyValueApi implements KeyValueApi {
     public Optional<byte[]> get(String key) {
         Require.nonNull(key, "null key");
 
-        if (nodeRepository.getNode().getStatus() == NodeStatus.DOWN) {
-            throw new IllegalNodeStateException("Operational node is down.");
-        }
+        this.checkNodeStatus();
 
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
         KeyValueRecord record = primaryIndex.get(key);
@@ -72,16 +69,14 @@ public class BerkleyKeyValueApi implements KeyValueApi {
      */
     @Override
     public Set<String> getKeys(String prefix) {
-        if (nodeRepository.getNode().getStatus() == NodeStatus.DOWN) {
-            throw new IllegalNodeStateException("Operational node is down.");
-        }
+        this.checkNodeStatus();
 
         Set<String> keys = new HashSet<>();
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
-        try (EntityCursor<KeyValueRecord> cursor = primaryIndex.entities()) {
-            for (KeyValueRecord record : cursor) {
-                if (record.getKey().startsWith(prefix)) {
-                    keys.add(record.getKey());
+        try (EntityCursor<String> cursor = primaryIndex.keys()) {
+            for (String key : cursor) {
+                if (key.startsWith(prefix)) {
+                    keys.add(key);
                 }
             }
         }
@@ -95,18 +90,10 @@ public class BerkleyKeyValueApi implements KeyValueApi {
     public void delete(String key) {
         Require.nonNull(key, "null key");
 
-        if (nodeRepository.getNode().getStatus() == NodeStatus.DOWN) {
-            throw new IllegalNodeStateException("Operational node is down.");
-        }
+        this.checkNodeStatus();
 
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
-        try (EntityCursor<KeyValueRecord> cursor = primaryIndex.entities()) {
-            for (KeyValueRecord record : cursor) {
-                if (record.getKey().equals(key)) {
-                    cursor.delete();
-                }
-            }
-        }
+        primaryIndex.delete(key);
     }
 
     /**
@@ -114,7 +101,19 @@ public class BerkleyKeyValueApi implements KeyValueApi {
      */
     @Override
     public Set<NodeInfo> getInfo() {
-        return nodeRepository.getNodesInfo();
+        return Collections.singleton(
+                new NodeInfo(this.nodeInfo.getName(), this.nodeInfo.getStatus())
+        );
+    }
+
+    public void setNodeName(String name) {
+        this.nodeInfo = new NodeInfo(name, this.nodeInfo.getStatus());
+    }
+
+    private void checkNodeStatus() throws IllegalNodeStateException {
+        if (this.nodeInfo.getStatus() == NodeStatus.DOWN) {
+            throw new IllegalNodeStateException("Operational node is down.");
+        }
     }
 
     /**
@@ -122,16 +121,15 @@ public class BerkleyKeyValueApi implements KeyValueApi {
      */
     @Override
     public void action(String node, NodeAction action) {
-        NodeInfo ni = nodeRepository.getNode(node);
-        if (ni == null) {
+        if (!this.nodeInfo.getName().equals(node)) {
             throw new RuntimeException("Node with name " + node + " not found");
         }
         switch (action) {
             case UP:
-                ni.setStatus(NodeStatus.UP);
+                this.nodeInfo.setStatus(NodeStatus.UP);
                 break;
             case DOWN:
-                ni.setStatus(NodeStatus.DOWN);
+                this.nodeInfo.setStatus(NodeStatus.DOWN);
                 break;
             default:
                 throw new RuntimeException("Unexpected node action");
