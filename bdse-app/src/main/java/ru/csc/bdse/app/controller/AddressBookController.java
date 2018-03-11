@@ -8,11 +8,11 @@ import ru.csc.bdse.app.service.BookRecordV1;
 import ru.csc.bdse.app.service.BookRecordV2;
 
 @RestController
-public class AddressController {
+public class AddressBookController {
     private final PhoneBookApi phoneBookApi;
 
     @Autowired
-    public AddressController(final PhoneBookApi phoneBookApi) {
+    public AddressBookController(final PhoneBookApi phoneBookApi) {
         this.phoneBookApi = phoneBookApi;
     }
 
