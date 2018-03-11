@@ -42,17 +42,14 @@ public class ServiceV1 implements PhoneBookApi<BookRecordV1> {
         addressBook.addPeople(p);
 
         byte[] byteRecord = addressBook.build().toByteArray();
-        String id = firstName + secondName + UUID.randomUUID().toString();
+        String id = secondName + UUID.randomUUID().toString();
         berkleyKeyValueApi.put(id, byteRecord);
     }
 
     @Override
     public void delete(BookRecordV1 record) {
-        String firstName = record.getFirstName();
         String secondName = record.getSecondName();
-        String prefixId = firstName + secondName;
-
-        Set<String> ids = berkleyKeyValueApi.getKeys(prefixId);
+        Set<String> ids = berkleyKeyValueApi.getKeys(secondName);
 
         for (String id : ids) {
             berkleyKeyValueApi.delete(id);
