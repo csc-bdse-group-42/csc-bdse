@@ -10,6 +10,8 @@ import ru.csc.bdse.app.Record;
 import ru.csc.bdse.app.v1.service.BookRecordV1;
 import ru.csc.bdse.app.v2.service.BookRecordV2;
 
+import java.util.List;
+
 @RestController
 public class BookControllerV2 {
     private final PhoneBookApi phoneBookApi;
@@ -23,10 +25,9 @@ public class BookControllerV2 {
     public void putV2(@RequestParam("firstName") String firstName,
                       @RequestParam("secondName") String secondName,
                       @RequestParam("secondName") String nickName,
-                      @RequestParam("phone1") String phone1,
-                      @RequestParam("phone2") String phone2) {
+                      @RequestParam(value="phones") List<String> phones) {
 
-        Record record = new BookRecordV2(firstName, secondName, nickName, phone1, phone2);
+        Record record = new BookRecordV2(firstName, secondName, nickName, phones);
         phoneBookApi.put(record);
     }
 
@@ -38,7 +39,7 @@ public class BookControllerV2 {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-person-v2")
-    public void getV2(@RequestParam("firstName") char literal) {
+    public void getV2(@RequestParam("literal") char literal) {
         phoneBookApi.get(literal);
     }
 

@@ -9,10 +9,7 @@ import ru.csc.bdse.util.Require;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
@@ -32,16 +29,17 @@ public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
         String secondName = record.getSecondName();
         String nickName = record.getNickName();
 
-        String phone1 = record.getPhone1();
-        String phone2 = record.getPhone2();
+        List<String> phones = record.getPhones();
 
         RecordBookProtos.AddressBook.Builder addressBook = RecordBookProtos.AddressBook.newBuilder();
         RecordBookProtos.Person.Builder person = RecordBookProtos.Person.newBuilder();
         person.setFirstName(firstName);
         person.setSecondName(secondName);
         person.setNickname(nickName);
-        person.setPhones(0, phone1);
-        person.setPhones(1, phone2);
+
+        for (int i = 0; i < phones.size(); i++) {
+            person.setPhones(i, phones.get(i));
+        }
 
         RecordBookProtos.Person p = person.build();
         addressBook.addPeople(p);
@@ -76,7 +74,7 @@ public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
 
                     for (RecordBookProtos.Person person : addressBook.getPeopleList()) {
                         BookRecordV2 recordV2 = new BookRecordV2(person.getFirstName(), person.getSecondName(),
-                                person.getNickname(), person.getPhones(0), person.getPhones(1));
+                                person.getNickname(), person.getPhonesList());
                         bookRecords.add(recordV2);
                     }
                 } catch (IOException e) {
