@@ -39,6 +39,16 @@ public class BookRecordV2 implements Record {
     }
 
     @Override
+    public String toString() {
+        return "BookRecordV2{" +
+                "firstName='" + firstName + '\'' +
+                ", secondName=" + secondName + '\'' +
+                ", nickName=" + nickName + '\'' +
+                ", phones=" + phones.toString() + '\'' +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -46,7 +56,7 @@ public class BookRecordV2 implements Record {
         return Objects.equals(firstName, that.firstName) &&
                 Objects.equals(secondName, that.secondName) &&
                 Objects.equals(nickName, that.nickName) &&
-                Objects.equals(phones, that.phones);
+                phones.equals(that.phones);
     }
 
     @Override

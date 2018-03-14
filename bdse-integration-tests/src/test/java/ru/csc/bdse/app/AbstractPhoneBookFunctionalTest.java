@@ -1,22 +1,35 @@
 package ru.csc.bdse.app;
 
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
-import ru.csc.bdse.app.v1.service.BookRecordV1;
 import ru.csc.bdse.util.Random;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
 
     protected abstract PhoneBookApi<T> newPhoneBookApi();
-    private PhoneBookApi<T> api;
+    private PhoneBookApi<T> api = newPhoneBookApi();
+    private Set<Character> addedLiterals = new HashSet<>();
 
     protected abstract T getNextRandomRecord();
     protected abstract T getNextRandomRecordWith(String firstName, String secondName);
 
-    @Before
-    public void initialize() {
-        api = newPhoneBookApi();
+    @After
+    public void clean() {
+        for (char literal: this.addedLiterals) {
+            for (T record: this.api.get(literal)) {
+                this.api.delete(record);
+            }
+        }
+        this.addedLiterals.clear();
+    }
+
+    private void addRecord(T record) {
+        this.api.put(record);
+        this.addedLiterals.addAll(record.literals());
     }
 
     // Gets records from an empty phone book.
@@ -36,7 +49,7 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
         T firstRecord = getNextRandomRecord();
         T secondRecord = getNextRandomRecord();
 
-        api.put(firstRecord);
+        addRecord(firstRecord);
 
         for (char literal: firstRecord.literals()) {
             softAssert.assertThat(api.get(literal).contains(firstRecord)).isTrue();
@@ -45,7 +58,7 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
             softAssert.assertThat(api.get(literal).contains(secondRecord)).isFalse();
         }
 
-        api.put(secondRecord);
+        addRecord(secondRecord);
         for (char literal: firstRecord.literals()) {
             softAssert.assertThat(api.get(literal).contains(firstRecord)).isTrue();
         }
@@ -62,8 +75,11 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
         SoftAssertions softAssert = new SoftAssertions();
 
         T record = getNextRandomRecord();
+        for (char literal: record.literals()) {
+            softAssert.assertThat(api.get(literal).contains(record)).isFalse();
+        }
 
-        api.put(record);
+        addRecord(record);
         for (char literal: record.literals()) {
             softAssert.assertThat(api.get(literal).contains(record)).isTrue();
         }
@@ -85,14 +101,14 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
         String secondName = Random.nextKey();
 
         T record = getNextRandomRecordWith(firstName, secondName);
-        api.put(record);
+        addRecord(record);
         for (char literal: record.literals()) {
             softAssert.assertThat(api.get(literal).contains(record)).isTrue();
         }
-        api.delete(record);
 
+        api.delete(record);
         T newRecord = getNextRandomRecordWith(firstName, secondName);
-        api.put(newRecord);
+        addRecord(newRecord);
         for (char literal: newRecord.literals()) {
             softAssert.assertThat(api.get(literal).contains(record)).isFalse();
             softAssert.assertThat(api.get(literal).contains(newRecord)).isTrue();
@@ -107,8 +123,9 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
         SoftAssertions softAssert = new SoftAssertions();
 
         T record = getNextRandomRecord();
-        api.put(record);
-        api.put(record);
+        addRecord(record);
+        addRecord(record);
+
         for (char literal: record.literals()) {
             softAssert.assertThat(api.get(literal)).hasSize(1);
         }
