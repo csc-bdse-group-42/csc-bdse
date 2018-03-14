@@ -2,6 +2,7 @@ package ru.csc.bdse.app.v1.service;
 
 import ru.csc.bdse.app.Record;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class BookRecordV1 implements Record {
@@ -11,7 +12,7 @@ public class BookRecordV1 implements Record {
 
     @Override
     public Set<Character> literals() {
-        return null;
+        return new HashSet<>(secondName.charAt(0));
     }
 
     public BookRecordV1(String firstName, String secondName, String phone) {
