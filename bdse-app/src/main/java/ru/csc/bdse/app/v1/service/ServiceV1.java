@@ -36,7 +36,7 @@ public class ServiceV1 implements PhoneBookApi<BookRecordV1> {
         RecordBookProtos.Person.Builder person = RecordBookProtos.Person.newBuilder();
         person.setFirstName(firstName);
         person.setSecondName(secondName);
-        person.setPhones(0, phone);
+        person.addPhones(phone);
 
         RecordBookProtos.Person p = person.build();
         addressBook.addPeople(p);

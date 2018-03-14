@@ -37,8 +37,8 @@ public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
         person.setSecondName(secondName);
         person.setNickname(nickName);
 
-        for (int i = 0; i < phones.size(); i++) {
-            person.setPhones(i, phones.get(i));
+        for (String phone : phones) {
+            person.addPhones(phone);
         }
 
         RecordBookProtos.Person p = person.build();
