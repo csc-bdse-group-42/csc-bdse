@@ -19,7 +19,7 @@ public class ServiceV1 implements PhoneBookApi<BookRecordV1> {
     private final BerkleyKeyValueApi berkleyKeyValueApi;
 
     @Autowired
-    ServiceV1(BerkleyKeyValueApi berkleyKeyValueApi) {
+    public ServiceV1(BerkleyKeyValueApi berkleyKeyValueApi) {
         this.berkleyKeyValueApi = berkleyKeyValueApi;
     }
 

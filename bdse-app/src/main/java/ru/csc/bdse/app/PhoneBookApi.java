@@ -1,7 +1,5 @@
 package ru.csc.bdse.app;
 
-import ru.csc.bdse.app.Record;
-
 import java.util.Set;
 
 /**

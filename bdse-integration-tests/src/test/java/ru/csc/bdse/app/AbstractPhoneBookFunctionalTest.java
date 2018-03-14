@@ -1,27 +1,26 @@
 package ru.csc.bdse.app;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
+import ru.csc.bdse.util.Random;
 
-/**
- * Test have to be implemented
- *
- * @author alesavin
- */
 public abstract class AbstractPhoneBookFunctionalTest {
 
-/*
     protected abstract PhoneBookApi newPhoneBookApi();
     private PhoneBookApi api = newPhoneBookApi();
-*/
 
+    // Gets records from an empty phone book.
     @Test
     public void getFromEmptyBook() {
-        // TODO get records from an empty phone book
+        SoftAssertions softAssert = new SoftAssertions();
+        softAssert.assertThat(api.get(Random.nextChar())).isEmpty();
+
+        softAssert.assertAll();
     }
 
+    // Puts and gets some test records.
     @Test
     public void putAndGet() {
-        //TODO write some data and read it
     }
 
     @Test

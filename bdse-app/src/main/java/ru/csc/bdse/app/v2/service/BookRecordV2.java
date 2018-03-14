@@ -5,7 +5,7 @@ import ru.csc.bdse.app.Record;
 import java.util.List;
 import java.util.Set;
 
-public class BookRecordV2 implements Record{
+public class BookRecordV2 implements Record {
     private final String firstName;
     private final String secondName;
     private final String nickName;
