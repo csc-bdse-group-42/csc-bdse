@@ -4,6 +4,7 @@ import ru.csc.bdse.app.Record;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class BookRecordV1 implements Record {
@@ -37,5 +38,29 @@ public class BookRecordV1 implements Record {
 
     public String getPhone() {
         return phone;
+    }
+
+    @Override
+    public String toString() {
+        return "BookRecordV1{" +
+                "firstName='" + firstName + '\'' +
+                ", secondName=" + secondName + '\'' +
+                ", phone=" + phone + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BookRecordV1 that = (BookRecordV1) o;
+        return Objects.equals(firstName, that.firstName) &&
+                Objects.equals(secondName, that.secondName) &&
+                Objects.equals(phone, that.phone);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstName, secondName, phone);
     }
 }

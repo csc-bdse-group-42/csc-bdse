@@ -2,10 +2,7 @@ package ru.csc.bdse.app.v2.service;
 
 import ru.csc.bdse.app.Record;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class BookRecordV2 implements Record {
     private final String firstName;
@@ -39,5 +36,21 @@ public class BookRecordV2 implements Record {
 
     public List<String> getPhones() {
         return phones;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BookRecordV2 that = (BookRecordV2) o;
+        return Objects.equals(firstName, that.firstName) &&
+                Objects.equals(secondName, that.secondName) &&
+                Objects.equals(nickName, that.nickName) &&
+                Objects.equals(phones, that.phones);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstName, secondName, nickName, phones);
     }
 }
