@@ -10,6 +10,7 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
     private PhoneBookApi<T> api = newPhoneBookApi();
 
     protected abstract T getNextRandomRecord();
+    protected abstract T getNextRandomRecordWith(String firstName, String secondName);
 
     // Gets records from an empty phone book.
     @Test
@@ -29,8 +30,8 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
         T secondRecord = getNextRandomRecord();
 
         api.put(firstRecord);
-
         for (char literal: firstRecord.literals()) {
+            System.out.println(literal);
             softAssert.assertThat(api.get(literal).contains(firstRecord)).isTrue();
         }
         for (char literal: secondRecord.literals()) {
@@ -38,7 +39,6 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
         }
 
         api.put(secondRecord);
-
         for (char literal: firstRecord.literals()) {
             softAssert.assertThat(api.get(literal).contains(firstRecord)).isTrue();
         }
@@ -57,13 +57,11 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
         T record = getNextRandomRecord();
 
         api.put(record);
-
         for (char literal: record.literals()) {
             softAssert.assertThat(api.get(literal).contains(record)).isTrue();
         }
 
         api.delete(record);
-
         for (char literal: record.literals()) {
             softAssert.assertThat(api.get(literal).contains(record)).isFalse();
         }
@@ -71,8 +69,43 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
         softAssert.assertAll();
     }
 
+    // Updates data.
     @Test
     public void update() {
-        //TODO update data and put some data twice
+        SoftAssertions softAssert = new SoftAssertions();
+
+        String firstName = Random.nextKey();
+        String secondName = Random.nextKey();
+
+        T record = getNextRandomRecordWith(firstName, secondName);
+        api.put(record);
+        for (char literal: record.literals()) {
+            softAssert.assertThat(api.get(literal).contains(record)).isTrue();
+        }
+        api.delete(record);
+
+        T newRecord = getNextRandomRecordWith(firstName, secondName);
+        api.put(newRecord);
+        for (char literal: newRecord.literals()) {
+            softAssert.assertThat(api.get(literal).contains(record)).isFalse();
+            softAssert.assertThat(api.get(literal).contains(newRecord)).isFalse();
+        }
+
+        softAssert.assertAll();
+    }
+
+    // Adds some data twice.
+    @Test
+    public void twicePutAndGet() {
+        SoftAssertions softAssert = new SoftAssertions();
+
+        T record = getNextRandomRecord();
+        api.put(record);
+        api.put(record);
+        for (char literal: record.literals()) {
+            softAssert.assertThat(api.get(literal)).hasSize(1);
+        }
+
+        softAssert.assertAll();
     }
 }

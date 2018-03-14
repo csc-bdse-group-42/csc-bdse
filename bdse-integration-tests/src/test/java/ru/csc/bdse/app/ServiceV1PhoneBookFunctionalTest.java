@@ -19,4 +19,9 @@ public class ServiceV1PhoneBookFunctionalTest extends AbstractPhoneBookFunctiona
     protected BookRecordV1 getNextRandomRecord() {
         return new BookRecordV1(Random.nextKey(), Random.nextKey(), Random.nextKey());
     }
+
+    @Override
+    protected BookRecordV1 getNextRandomRecordWith(String firstName, String secondName) {
+        return new BookRecordV1(firstName, secondName, Random.nextKey());
+    }
 }
