@@ -24,7 +24,7 @@ public class BookControllerV2 {
     @RequestMapping(method = RequestMethod.PUT, value = "/add-person-v2")
     public void putV2(@RequestParam("firstName") String firstName,
                       @RequestParam("secondName") String secondName,
-                      @RequestParam("secondName") String nickName,
+                      @RequestParam("nickName") String nickName,
                       @RequestParam(value="phones") List<String> phones) {
 
         Record record = new BookRecordV2(firstName, secondName, nickName, phones);
