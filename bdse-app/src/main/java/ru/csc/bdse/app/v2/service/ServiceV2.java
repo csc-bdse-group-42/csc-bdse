@@ -31,7 +31,6 @@ public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
 
         List<String> phones = record.getPhones();
 
-        RecordBookProtos.AddressBook.Builder addressBook = RecordBookProtos.AddressBook.newBuilder();
         RecordBookProtos.Person.Builder person = RecordBookProtos.Person.newBuilder();
         person.setFirstName(firstName);
         person.setSecondName(secondName);
@@ -41,10 +40,7 @@ public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
             person.addPhones(phone);
         }
 
-        RecordBookProtos.Person p = person.build();
-        addressBook.addPeople(p);
-
-        byte[] byteRecord = addressBook.build().toByteArray();
+        byte[] byteRecord = person.build().toByteArray();
 
         String id = secondName + UUID.randomUUID().toString();
         berkleyKeyValueApi.put(id, byteRecord);
@@ -69,16 +65,12 @@ public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
 
             if (bytes.isPresent()) {
                 try {
-                    RecordBookProtos.AddressBook addressBook =
-                            RecordBookProtos.AddressBook.parseFrom(new ByteArrayInputStream(bytes.get()));
-
-                    for (RecordBookProtos.Person person : addressBook.getPeopleList()) {
-                        if ((person.hasSecondName() && person.getSecondName().charAt(0) == literal) ||
-                                (person.hasNickname() && person.getNickname().charAt(0) == literal)) {
-                            BookRecordV2 recordV2 = new BookRecordV2(person.getFirstName(), person.getSecondName(),
-                                    person.getNickname(), person.getPhonesList());
-                            bookRecords.add(recordV2);
-                        }
+                    RecordBookProtos.Person person = RecordBookProtos.Person.parseFrom(new ByteArrayInputStream(bytes.get()));
+                    if ((person.hasSecondName() && person.getSecondName().charAt(0) == literal) ||
+                            (person.hasNickname() && person.getNickname().charAt(0) == literal)) {
+                        BookRecordV2 recordV2 = new BookRecordV2(person.getFirstName(), person.getSecondName(),
+                                person.getNickname(), person.getPhonesList());
+                        bookRecords.add(recordV2);
                     }
                 } catch (IOException e) {
                     throw new IllegalArgumentException();

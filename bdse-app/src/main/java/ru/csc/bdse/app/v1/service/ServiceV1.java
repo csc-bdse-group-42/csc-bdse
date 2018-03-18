@@ -32,16 +32,12 @@ public class ServiceV1 implements PhoneBookApi<BookRecordV1> {
         String secondName = record.getSecondName();
         String phone = record.getPhone();
 
-        RecordBookProtos.AddressBook.Builder addressBook = RecordBookProtos.AddressBook.newBuilder();
         RecordBookProtos.Person.Builder person = RecordBookProtos.Person.newBuilder();
         person.setFirstName(firstName);
         person.setSecondName(secondName);
         person.addPhones(phone);
 
-        RecordBookProtos.Person p = person.build();
-        addressBook.addPeople(p);
-
-        byte[] byteRecord = addressBook.build().toByteArray();
+        byte[] byteRecord = person.build().toByteArray();
         String id = secondName + UUID.randomUUID().toString();
         berkleyKeyValueApi.put(id, byteRecord);
     }
@@ -65,13 +61,9 @@ public class ServiceV1 implements PhoneBookApi<BookRecordV1> {
 
             if (bytes.isPresent()) {
                 try {
-                    RecordBookProtos.AddressBook addressBook =
-                            RecordBookProtos.AddressBook.parseFrom(new ByteArrayInputStream(bytes.get()));
-
-                    for (RecordBookProtos.Person person : addressBook.getPeopleList()) {
-                        BookRecordV1 recordV1 = new BookRecordV1(person.getFirstName(), person.getSecondName(), person.getPhones(0));
-                        bookRecords.add(recordV1);
-                    }
+                    RecordBookProtos.Person person = RecordBookProtos.Person.parseFrom(new ByteArrayInputStream(bytes.get()));
+                    BookRecordV1 recordV1 = new BookRecordV1(person.getFirstName(), person.getSecondName(), person.getPhones(0));
+                    bookRecords.add(recordV1);
                 } catch (IOException e) {
                     throw new IllegalArgumentException();
                 }

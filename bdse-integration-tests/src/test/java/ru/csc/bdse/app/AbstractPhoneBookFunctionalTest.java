@@ -152,10 +152,10 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
         api.delete(record2);
 
         for (char literal: record1.literals()) {
-            softAssert.assertThat(api.get(literal).contains(record1)).isTrue();
+            softAssert.assertThat(api.get(literal).contains(record1)).as("not removed value").isTrue();
         }
         for (char literal: record2.literals()) {
-            softAssert.assertThat(api.get(literal).contains(record2)).isFalse();
+            softAssert.assertThat(api.get(literal).contains(record2)).as("removed value").isFalse();
         }
 
         softAssert.assertAll();
