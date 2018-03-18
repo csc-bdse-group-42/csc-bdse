@@ -23,6 +23,9 @@ public class ServiceV1 implements PhoneBookApi<BookRecordV1> {
         this.berkleyKeyValueApi = berkleyKeyValueApi;
     }
 
+    private String recordKey(BookRecordV1 record) {
+        return record.getSecondName() + record.getFirstName();
+    }
 
     @Override
     public void put(BookRecordV1 record) {
@@ -38,14 +41,13 @@ public class ServiceV1 implements PhoneBookApi<BookRecordV1> {
         person.addPhones(phone);
 
         byte[] byteRecord = person.build().toByteArray();
-        String id = secondName + UUID.randomUUID().toString();
+        String id = recordKey(record) + UUID.randomUUID().toString();
         berkleyKeyValueApi.put(id, byteRecord);
     }
 
     @Override
     public void delete(BookRecordV1 record) {
-        String secondName = record.getSecondName();
-        Set<String> ids = berkleyKeyValueApi.getKeys(secondName);
+        Set<String> ids = berkleyKeyValueApi.getKeys(recordKey(record));
 
         for (String id : ids) {
             berkleyKeyValueApi.delete(id);
@@ -68,7 +70,6 @@ public class ServiceV1 implements PhoneBookApi<BookRecordV1> {
                     throw new IllegalArgumentException();
                 }
             }
-
         }
 
         return bookRecords;

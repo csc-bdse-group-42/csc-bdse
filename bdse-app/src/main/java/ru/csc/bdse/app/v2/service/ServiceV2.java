@@ -20,6 +20,9 @@ public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
         this.berkleyKeyValueApi = berkleyKeyValueApi;
     }
 
+    private String recordKey(BookRecordV2 record) {
+        return record.getSecondName() + record.getFirstName();
+    }
 
     @Override
     public void put(BookRecordV2 record) {
@@ -42,14 +45,13 @@ public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
 
         byte[] byteRecord = person.build().toByteArray();
 
-        String id = secondName + UUID.randomUUID().toString();
+        String id = recordKey(record) + UUID.randomUUID().toString();
         berkleyKeyValueApi.put(id, byteRecord);
     }
 
     @Override
     public void delete(BookRecordV2 record) {
-        String secondName = record.getSecondName();
-        Set<String> ids = berkleyKeyValueApi.getKeys(secondName);
+        Set<String> ids = berkleyKeyValueApi.getKeys(recordKey(record));
 
         for (String id : ids) {
             berkleyKeyValueApi.delete(id);
