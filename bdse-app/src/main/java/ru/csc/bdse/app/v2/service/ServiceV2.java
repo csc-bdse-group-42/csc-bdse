@@ -73,7 +73,8 @@ public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
                             RecordBookProtos.AddressBook.parseFrom(new ByteArrayInputStream(bytes.get()));
 
                     for (RecordBookProtos.Person person : addressBook.getPeopleList()) {
-                        if (person.getSecondName().charAt(0) == literal || person.getNickname().charAt(0) == literal) {
+                        if ((person.hasSecondName() && person.getSecondName().charAt(0) == literal) ||
+                                (person.hasNickname() && person.getNickname().charAt(0) == literal)) {
                             BookRecordV2 recordV2 = new BookRecordV2(person.getFirstName(), person.getSecondName(),
                                     person.getNickname(), person.getPhonesList());
                             bookRecords.add(recordV2);
