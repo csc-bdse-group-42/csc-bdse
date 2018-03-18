@@ -132,4 +132,32 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
 
         softAssert.assertAll();
     }
+
+    // Checks correctness of work with data with same surnames but different first names.
+    @Test
+    public void sameSurnamesDifferentNames() {
+        SoftAssertions softAssert = new SoftAssertions();
+
+        String secondName = Random.nextKey();
+
+        String firstName1 = Random.nextKey();
+        String firstName2 = Random.nextKey();
+
+        T record1 = getNextRandomRecordWith(firstName1, secondName);
+        T record2 = getNextRandomRecordWith(firstName2, secondName);
+
+        addRecord(record1);
+        addRecord(record2);
+
+        api.delete(record2);
+
+        for (char literal: record1.literals()) {
+            softAssert.assertThat(api.get(literal).contains(record1)).isTrue();
+        }
+        for (char literal: record2.literals()) {
+            softAssert.assertThat(api.get(literal).contains(record2)).isFalse();
+        }
+
+        softAssert.assertAll();
+    }
 }
