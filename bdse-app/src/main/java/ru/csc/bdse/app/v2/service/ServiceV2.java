@@ -43,42 +43,46 @@ public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
             person.addPhones(phone);
         }
 
+        String key = recordKey(record);
+        byte[] byteKey = key.getBytes();
         byte[] byteRecord = person.build().toByteArray();
 
-        String id = recordKey(record) + UUID.randomUUID().toString();
-        berkleyKeyValueApi.put(id, byteRecord);
+        berkleyKeyValueApi.put("@" + nickName, byteKey);
+        berkleyKeyValueApi.put(recordKey(record), byteRecord);
     }
 
     @Override
     public void delete(BookRecordV2 record) {
-        Set<String> ids = berkleyKeyValueApi.getKeys(recordKey(record));
-
-        for (String id : ids) {
-            berkleyKeyValueApi.delete(id);
-        }
+        berkleyKeyValueApi.delete("@" + record.getNickName());
+        berkleyKeyValueApi.delete(recordKey(record));
     }
 
     @Override
     public Set<BookRecordV2> get(char literal) {
         Set<BookRecordV2> bookRecords = new HashSet<>();
 
-        for (String key : berkleyKeyValueApi.getKeys("")) {
+        Set<String> surnameKeys = berkleyKeyValueApi.getKeys(Character.toString(literal));
+
+        Set<String> nicknameKeys = berkleyKeyValueApi.getKeys("@" + literal);
+        nicknameKeys.stream()
+                    .map(berkleyKeyValueApi::get)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .forEach(bytes -> surnameKeys.add(new String(bytes)));
+
+        for (String key : surnameKeys) {
             Optional<byte[]> bytes = berkleyKeyValueApi.get(key);
 
             if (bytes.isPresent()) {
                 try {
                     RecordBookProtos.Person person = RecordBookProtos.Person.parseFrom(new ByteArrayInputStream(bytes.get()));
-                    if ((person.hasSecondName() && person.getSecondName().charAt(0) == literal) ||
-                            (person.hasNickname() && person.getNickname().charAt(0) == literal)) {
-                        BookRecordV2 recordV2 = new BookRecordV2(person.getFirstName(), person.getSecondName(),
+                    BookRecordV2 recordV2 = new BookRecordV2(person.getFirstName(), person.getSecondName(),
                                 person.getNickname(), person.getPhonesList());
-                        bookRecords.add(recordV2);
-                    }
+                    bookRecords.add(recordV2);
                 } catch (IOException e) {
                     throw new IllegalArgumentException();
                 }
             }
-
         }
 
         return bookRecords;

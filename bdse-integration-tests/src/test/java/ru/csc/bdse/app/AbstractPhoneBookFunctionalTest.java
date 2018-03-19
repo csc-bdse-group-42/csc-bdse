@@ -106,7 +106,6 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
             softAssert.assertThat(api.get(literal).contains(record)).isTrue();
         }
 
-        api.delete(record);
         T newRecord = getNextRandomRecordWith(firstName, secondName);
         addRecord(newRecord);
         for (char literal: newRecord.literals()) {

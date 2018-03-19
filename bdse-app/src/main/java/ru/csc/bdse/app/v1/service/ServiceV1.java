@@ -41,8 +41,7 @@ public class ServiceV1 implements PhoneBookApi<BookRecordV1> {
         person.addPhones(phone);
 
         byte[] byteRecord = person.build().toByteArray();
-        String id = recordKey(record) + UUID.randomUUID().toString();
-        berkleyKeyValueApi.put(id, byteRecord);
+        berkleyKeyValueApi.put(recordKey(record), byteRecord);
     }
 
     @Override
