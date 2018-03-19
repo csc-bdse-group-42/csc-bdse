@@ -22,6 +22,7 @@
 		<module>bdse-kvnode</module>
 		<module>bdse-app</module>
 		<module>bdse-integration-tests</module>
+		<module>bdse-app-v11</module>
 	</modules>
 
 	<parent>

@@ -9,7 +9,7 @@ import ru.csc.bdse.util.Random;
 
 import java.util.Arrays;
 
-public class ServiceV2PhoneBookFunctionalTest extends AbstractPhoneBookFunctionalTest<BookRecordV2> {
+public class PhoneBookServiceV2PhoneBookFunctionalTest extends AbstractPhoneBookFunctionalTest<BookRecordV2> {
     @Override
     protected PhoneBookApi<BookRecordV2> newPhoneBookApi() {
         ApplicationProperties properties = new ApplicationProperties();

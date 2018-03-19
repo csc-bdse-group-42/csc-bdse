@@ -9,7 +9,7 @@
 - Не рекомендуется использовать Windows https://www.testcontainers.org/usage/windows_support.html 
 
 #Структура модулей проекта
-- bdse-app содержит код реализуемого бизнес-приложения 
+- bdse-ru.csc.bdse.app содержит код реализуемого бизнес-приложения 
 - bdse-kvnode содержит код Persistent Storage Unit 
 - bdse-integration-tests содержит утилиты и тесты для интеграционного тестирования
 

@@ -1,9 +1,10 @@
-package ru.csc.bdse.app.v1.service;
+package ru.csc.bdse.app.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.csc.bdse.app.PhoneBookApi;
 import ru.csc.bdse.app.RecordBookProtos;
+import ru.csc.bdse.app.model.BookRecord;
 import ru.csc.bdse.kv.BerkleyKeyValueApi;
 import ru.csc.bdse.util.Require;
 
@@ -12,23 +13,22 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 @Service
-public class ServiceV1 implements PhoneBookApi<BookRecordV1> {
+public class PhoneBookService implements PhoneBookApi<BookRecord> {
     private final BerkleyKeyValueApi berkleyKeyValueApi;
 
     @Autowired
-    public ServiceV1(BerkleyKeyValueApi berkleyKeyValueApi) {
+    public PhoneBookService(BerkleyKeyValueApi berkleyKeyValueApi) {
         this.berkleyKeyValueApi = berkleyKeyValueApi;
     }
 
-    private String recordKey(BookRecordV1 record) {
+    private String recordKey(BookRecord record) {
         return record.getSecondName() + record.getFirstName();
     }
 
     @Override
-    public void put(BookRecordV1 record) {
+    public void put(BookRecord record) {
         Require.nonNull(record, "null key");
 
         String firstName = record.getFirstName();
@@ -45,13 +45,13 @@ public class ServiceV1 implements PhoneBookApi<BookRecordV1> {
     }
 
     @Override
-    public void delete(BookRecordV1 record) {
+    public void delete(BookRecord record) {
         berkleyKeyValueApi.delete(recordKey(record));
     }
 
     @Override
-    public Set<BookRecordV1> get(char literal) {
-        Set<BookRecordV1> bookRecords = new HashSet<>();
+    public Set<BookRecord> get(char literal) {
+        Set<BookRecord> bookRecords = new HashSet<>();
 
         for (String key : berkleyKeyValueApi.getKeys(Character.toString(literal))) {
             Optional<byte[]> bytes = berkleyKeyValueApi.get(key);
@@ -59,7 +59,7 @@ public class ServiceV1 implements PhoneBookApi<BookRecordV1> {
             if (bytes.isPresent()) {
                 try {
                     RecordBookProtos.Person person = RecordBookProtos.Person.parseFrom(new ByteArrayInputStream(bytes.get()));
-                    BookRecordV1 recordV1 = new BookRecordV1(person.getFirstName(), person.getSecondName(), person.getPhones(0));
+                    BookRecord recordV1 = new BookRecord(person.getFirstName(), person.getSecondName(), person.getPhones(0));
                     bookRecords.add(recordV1);
                 } catch (IOException e) {
                     throw new IllegalArgumentException();

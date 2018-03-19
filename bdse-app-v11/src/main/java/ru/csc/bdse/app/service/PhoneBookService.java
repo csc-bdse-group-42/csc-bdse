@@ -1,31 +1,35 @@
-package ru.csc.bdse.app.v2.service;
+package ru.csc.bdse.app.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.csc.bdse.app.PhoneBookApi;
 import ru.csc.bdse.app.RecordBookProtos;
+import ru.csc.bdse.app.model.BookRecord;
 import ru.csc.bdse.kv.BerkleyKeyValueApi;
 import ru.csc.bdse.util.Require;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
-public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
+public class PhoneBookService implements PhoneBookApi<BookRecord> {
     private final BerkleyKeyValueApi berkleyKeyValueApi;
 
     @Autowired
-    public ServiceV2(BerkleyKeyValueApi berkleyKeyValueApi) {
+    public PhoneBookService(BerkleyKeyValueApi berkleyKeyValueApi) {
         this.berkleyKeyValueApi = berkleyKeyValueApi;
     }
 
-    private String recordKey(BookRecordV2 record) {
+    private String recordKey(BookRecord record) {
         return record.getSecondName() + record.getFirstName();
     }
 
     @Override
-    public void put(BookRecordV2 record) {
+    public void put(BookRecord record) {
         Require.nonNull(record, "null key");
 
         String firstName = record.getFirstName();
@@ -52,14 +56,14 @@ public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
     }
 
     @Override
-    public void delete(BookRecordV2 record) {
+    public void delete(BookRecord record) {
         berkleyKeyValueApi.delete("@" + record.getNickName());
         berkleyKeyValueApi.delete(recordKey(record));
     }
 
     @Override
-    public Set<BookRecordV2> get(char literal) {
-        Set<BookRecordV2> bookRecords = new HashSet<>();
+    public Set<BookRecord> get(char literal) {
+        Set<BookRecord> bookRecords = new HashSet<>();
 
         Set<String> surnameKeys = berkleyKeyValueApi.getKeys(Character.toString(literal));
 
@@ -76,7 +80,7 @@ public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
             if (bytes.isPresent()) {
                 try {
                     RecordBookProtos.Person person = RecordBookProtos.Person.parseFrom(new ByteArrayInputStream(bytes.get()));
-                    BookRecordV2 recordV2 = new BookRecordV2(person.getFirstName(), person.getSecondName(),
+                    BookRecord recordV2 = new BookRecord(person.getFirstName(), person.getSecondName(),
                                 person.getNickname(), person.getPhonesList());
                     bookRecords.add(recordV2);
                 } catch (IOException e) {

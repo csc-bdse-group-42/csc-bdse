@@ -1,20 +1,28 @@
-package ru.csc.bdse.app.v2.service;
+package ru.csc.bdse.app.model;
 
 import ru.csc.bdse.app.Record;
 
+import java.awt.print.Book;
 import java.util.*;
 
-public class BookRecordV2 implements Record {
-    private final String firstName;
-    private final String secondName;
-    private final String nickName;
-    private final List<String> phones;
+public class BookRecord implements Record {
+    private String firstName;
+    private String secondName;
+    private String nickName;
+    private List<String> phones;
 
-    public BookRecordV2(String firstName, String secondName, String nickName, List<String> phones) {
+    public BookRecord(String firstName, String secondName, String nickName, List<String> phones) {
         this.firstName = firstName;
         this.secondName = secondName;
         this.nickName = nickName;
         this.phones = phones;
+    }
+
+    public BookRecord() {}
+
+    public BookRecord(String firstName, String secondName) {
+        this.firstName = firstName;
+        this.secondName = secondName;
     }
 
     @Override
@@ -40,7 +48,7 @@ public class BookRecordV2 implements Record {
 
     @Override
     public String toString() {
-        return "BookRecordV2{" +
+        return "BookRecord{" +
                 "firstName='" + firstName + '\'' +
                 ", secondName=" + secondName + '\'' +
                 ", nickName=" + nickName + '\'' +
@@ -52,7 +60,7 @@ public class BookRecordV2 implements Record {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BookRecordV2 that = (BookRecordV2) o;
+        BookRecord that = (BookRecord) o;
         return Objects.equals(firstName, that.firstName) &&
                 Objects.equals(secondName, that.secondName) &&
                 Objects.equals(nickName, that.nickName) &&

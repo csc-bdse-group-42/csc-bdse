@@ -1,0 +1,15 @@
+PUT http://localhost:8080/person
+Content-Type: application/json
+
+{"firstName": "Test2", "secondName": "testS", "nickName": "hacker98", "phones": ["79003433333", "79015663343"]}
+
+###
+
+GET http://localhost:8080/person/t
+
+###
+
+DELETE http://localhost:8080/person/?firstName=Test2&secondName=testS
+Content-Type: application/json
+
+###

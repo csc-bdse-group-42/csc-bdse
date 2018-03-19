@@ -4,8 +4,8 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
 import org.junit.Test;
 import ru.csc.bdse.ApplicationProperties;
-import ru.csc.bdse.app.v1.service.BookRecordV1;
-import ru.csc.bdse.app.v1.service.ServiceV1;
+import ru.csc.bdse.app.model.BookRecord;
+import ru.csc.bdse.app.service.PhoneBookService;
 import ru.csc.bdse.app.v2.service.BookRecordV2;
 import ru.csc.bdse.app.v2.service.ServiceV2;
 import ru.csc.bdse.datasource.BerkleyDataSource;
@@ -22,7 +22,7 @@ import java.util.Set;
  */
 public class PhoneBookNonFunctionalTest {
 
-    private ServiceV1 serviceV1;
+    private PhoneBookService phoneBookService;
     private BerkleyKeyValueApi berkleyKeyValueApi;
 
     @Before
@@ -34,23 +34,23 @@ public class PhoneBookNonFunctionalTest {
         berkleyKeyValueApi.setNodeName("testNode");
         berkleyKeyValueApi.action("testNode", NodeAction.DOWN);
 
-        serviceV1 = new ServiceV1(berkleyKeyValueApi);
+        phoneBookService = new PhoneBookService(berkleyKeyValueApi);
     }
 
     @Test(expected = IllegalNodeStateException.class)
     public void putGetErasureWithStoppedNode() {
         SoftAssertions softAssert = new SoftAssertions();
 
-        BookRecordV1 recordV1 = new BookRecordV1("Vasya", "Pupkin", "89115467734");
-        serviceV1.put(recordV1);
+        BookRecord recordV1 = new BookRecord("Vasya", "Pupkin", "89115467734");
+        phoneBookService.put(recordV1);
 
-        Set<BookRecordV1> bookRecordV1Set = serviceV1.get('P');
-        softAssert.assertThat(!bookRecordV1Set.isEmpty());
+        Set<BookRecord> bookRecordSet = phoneBookService.get('P');
+        softAssert.assertThat(!bookRecordSet.isEmpty());
     }
 
     @Test
     public void dataWasSavedIfAppRestarts() {
-        // TODO test data was saved after app restarts
+        // TODO test data was saved after ru.csc.bdse.app restarts
     }
 
     @Test
@@ -58,16 +58,16 @@ public class PhoneBookNonFunctionalTest {
         SoftAssertions softAssert = new SoftAssertions();
         berkleyKeyValueApi.action("testNode", NodeAction.UP);
 
-        BookRecordV1 recordV1 = new BookRecordV1("Vasya", "Pupkin", "89115467734");
-        serviceV1.put(recordV1);
+        BookRecord recordV1 = new BookRecord("Vasya", "Pupkin", "89115467734");
+        phoneBookService.put(recordV1);
 
         ApplicationProperties properties = new ApplicationProperties();
         properties.setDbfile("test.db");
         berkleyKeyValueApi = new BerkleyKeyValueApi(new BerkleyDataSource(properties));
 
-        serviceV1 = new ServiceV1(berkleyKeyValueApi);
+        phoneBookService = new PhoneBookService(berkleyKeyValueApi);
 
-        Set<BookRecordV1> bookRecordV1Set = serviceV1.get('P');
-        softAssert.assertThat(!bookRecordV1Set.isEmpty());
+        Set<BookRecord> bookRecordSet = phoneBookService.get('P');
+        softAssert.assertThat(!bookRecordSet.isEmpty());
     }
 }
