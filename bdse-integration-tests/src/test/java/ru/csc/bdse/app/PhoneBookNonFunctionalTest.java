@@ -37,23 +37,15 @@ public class PhoneBookNonFunctionalTest {
         serviceV1 = new ServiceV1(berkleyKeyValueApi);
     }
 
-    @Test
+    @Test(expected = IllegalNodeStateException.class)
     public void putGetErasureWithStoppedNode() {
-
         SoftAssertions softAssert = new SoftAssertions();
-        IllegalNodeStateException exception = null;
 
-        try {
-            BookRecordV1 recordV1 = new BookRecordV1("Vasya", "Pupkin", "89115467734");
-            serviceV1.put(recordV1);
+        BookRecordV1 recordV1 = new BookRecordV1("Vasya", "Pupkin", "89115467734");
+        serviceV1.put(recordV1);
 
-            Set<BookRecordV1> bookRecordV1Set = serviceV1.get('P');
-            softAssert.assertThat(!bookRecordV1Set.isEmpty());
-        } catch (IllegalNodeStateException e) {
-            exception = e;
-        }
-
-        softAssert.assertThat(exception != null);
+        Set<BookRecordV1> bookRecordV1Set = serviceV1.get('P');
+        softAssert.assertThat(!bookRecordV1Set.isEmpty());
     }
 
     @Test
