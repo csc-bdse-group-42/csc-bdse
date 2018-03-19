@@ -28,7 +28,7 @@ public class PhoneBookCompatibilitiesTest {
     private ServiceV2 serviceV2;
 
     @Before
-    public void init(){
+    public void init() {
         ApplicationProperties properties = new ApplicationProperties();
         properties.setDbfile("test.db");
         serviceV1 = new ServiceV1(new BerkleyKeyValueApi(new BerkleyDataSource(properties)));

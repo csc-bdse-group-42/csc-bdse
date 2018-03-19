@@ -46,11 +46,7 @@ public class ServiceV1 implements PhoneBookApi<BookRecordV1> {
 
     @Override
     public void delete(BookRecordV1 record) {
-        Set<String> ids = berkleyKeyValueApi.getKeys(recordKey(record));
-
-        for (String id : ids) {
-            berkleyKeyValueApi.delete(id);
-        }
+        berkleyKeyValueApi.delete(recordKey(record));
     }
 
     @Override
