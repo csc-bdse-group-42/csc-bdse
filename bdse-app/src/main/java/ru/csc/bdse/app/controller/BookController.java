@@ -10,6 +10,7 @@ import javax.websocket.server.PathParam;
 import java.util.Set;
 
 @RestController
+@RequestMapping("/person")
 public class BookController {
     private final PhoneBookApi phoneBookApi;
 
@@ -17,13 +18,13 @@ public class BookController {
         this.phoneBookApi = phoneBookApi;
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/person")
+    @RequestMapping(method = RequestMethod.PUT)
     public String put(@RequestBody BookRecord record) {
         phoneBookApi.put(record);
         return "OK";
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "/person")
+    @RequestMapping(method = RequestMethod.DELETE)
     public String deleteV1(@RequestParam("firstName") String firstName,
                          @RequestParam("secondName") String secondName) {
         Record record = new BookRecord(firstName, secondName);
@@ -31,7 +32,7 @@ public class BookController {
         return "OK";
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/person/{literal}")
+    @RequestMapping(method = RequestMethod.GET, value = "/{literal}")
     public Set<BookRecord> get(@PathVariable("literal") char literal) {
         return phoneBookApi.get(literal);
     }

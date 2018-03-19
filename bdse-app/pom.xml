@@ -14,7 +14,7 @@
         <artifactId>bdse</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>bdse-ru.csc.bdse.app</artifactId>
+    <artifactId>bdse-app</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
 </project>
