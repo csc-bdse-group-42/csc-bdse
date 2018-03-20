@@ -21,8 +21,8 @@ public class BookControllerV11 {
         this.phoneBookApi = phoneBookApi;
     }
 
-    @RequestMapping(method = RequestMethod.PUT)
-    public String put(@RequestBody BookRecordV11 record) {
+    @RequestMapping(method = RequestMethod.POST)
+    public String post(@RequestBody BookRecordV11 record) {
         phoneBookApi.put(record);
         return "OK";
     }
