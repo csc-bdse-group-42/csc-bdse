@@ -161,6 +161,7 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
         softAssert.assertAll();
     }
 
+    // Checks '@' character in name.
     @Test(expected = NameAndSurnameCannotContainAtException.class)
     public void nameContainsAtCharacter() {
         T record = getNextRandomRecordWith("@Name", "Surname");
