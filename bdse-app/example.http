@@ -1,0 +1,31 @@
+### V1.1
+
+PUT http://localhost:8080/v1.1/person
+Content-Type: application/json
+
+{"firstName": "Test2", "secondName": "testS", "nickName": "hacker98", "phones": ["79003433333", "79015663343"]}
+
+###
+
+GET http://localhost:8080/v1.1/person/t
+
+###
+
+DELETE http://localhost:8080/v1.1/person/?firstName=Test2&secondName=testS
+Content-Type: application/json
+
+### V1.0 (Legacy)
+
+PUT http://localhost:8080/v1.0/person
+Content-Type: application/json
+
+{"firstName": "Test2", "secondName": "testS", "phone": "79003433333"}
+
+###
+
+GET http://localhost:8080/v1.0/person/t
+
+###
+
+DELETE http://localhost:8080/v1.0/person/?firstName=Test2&secondName=testS
+Content-Type: application/json

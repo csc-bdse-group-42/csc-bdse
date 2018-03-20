@@ -1,9 +1,12 @@
-package ru.csc.bdse.app.v2.service;
+package ru.csc.bdse.app.v11.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import ru.csc.bdse.app.PhoneBookApi;
 import ru.csc.bdse.app.RecordBookProtos;
+import ru.csc.bdse.app.v11.model.BookRecordV11;
 import ru.csc.bdse.kv.BerkleyKeyValueApi;
 import ru.csc.bdse.util.Require;
 
@@ -11,21 +14,23 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 
+@Primary
+@Qualifier("PhoneBookServiceV11")
 @Service
-public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
+public class PhoneBookServiceV11 implements PhoneBookApi<BookRecordV11> {
     private final BerkleyKeyValueApi berkleyKeyValueApi;
 
     @Autowired
-    public ServiceV2(BerkleyKeyValueApi berkleyKeyValueApi) {
+    public PhoneBookServiceV11(BerkleyKeyValueApi berkleyKeyValueApi) {
         this.berkleyKeyValueApi = berkleyKeyValueApi;
     }
 
-    private String recordKey(BookRecordV2 record) {
+    private String recordKey(BookRecordV11 record) {
         return record.getSecondName() + record.getFirstName();
     }
 
     @Override
-    public void put(BookRecordV2 record) {
+    public void put(BookRecordV11 record) {
         Require.nonNull(record, "null key");
 
         String firstName = record.getFirstName();
@@ -52,14 +57,14 @@ public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
     }
 
     @Override
-    public void delete(BookRecordV2 record) {
+    public void delete(BookRecordV11 record) {
         berkleyKeyValueApi.delete("@" + record.getNickName());
         berkleyKeyValueApi.delete(recordKey(record));
     }
 
     @Override
-    public Set<BookRecordV2> get(char literal) {
-        Set<BookRecordV2> bookRecords = new HashSet<>();
+    public Set<BookRecordV11> get(char literal) {
+        Set<BookRecordV11> bookRecords = new HashSet<>();
 
         Set<String> surnameKeys = berkleyKeyValueApi.getKeys(Character.toString(literal));
 
@@ -76,7 +81,7 @@ public class ServiceV2 implements PhoneBookApi<BookRecordV2> {
             if (bytes.isPresent()) {
                 try {
                     RecordBookProtos.Person person = RecordBookProtos.Person.parseFrom(new ByteArrayInputStream(bytes.get()));
-                    BookRecordV2 recordV2 = new BookRecordV2(person.getFirstName(), person.getSecondName(),
+                    BookRecordV11 recordV2 = new BookRecordV11(person.getFirstName(), person.getSecondName(),
                                 person.getNickname(), person.getPhonesList());
                     bookRecords.add(recordV2);
                 } catch (IOException e) {

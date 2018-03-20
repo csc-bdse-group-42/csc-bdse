@@ -1,8 +1,8 @@
 package ru.csc.bdse.app;
 
 import ru.csc.bdse.ApplicationProperties;
-import ru.csc.bdse.app.v1.service.BookRecordV1;
-import ru.csc.bdse.app.v1.service.ServiceV1;
+import ru.csc.bdse.app.v10.service.BookRecordV1;
+import ru.csc.bdse.app.v10.service.ServiceV1;
 import ru.csc.bdse.datasource.BerkleyDataSource;
 import ru.csc.bdse.kv.BerkleyKeyValueApi;
 import ru.csc.bdse.util.Random;

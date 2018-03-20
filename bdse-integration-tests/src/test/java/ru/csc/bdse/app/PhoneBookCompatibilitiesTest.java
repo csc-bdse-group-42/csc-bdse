@@ -5,15 +5,13 @@ import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import ru.csc.bdse.ApplicationProperties;
-import ru.csc.bdse.app.v1.service.BookRecordV1;
-import ru.csc.bdse.app.v1.service.ServiceV1;
-import ru.csc.bdse.app.v2.service.BookRecordV2;
-import ru.csc.bdse.app.v2.service.ServiceV2;
+import ru.csc.bdse.app.v10.service.BookRecordV1;
+import ru.csc.bdse.app.v10.service.ServiceV1;
+import ru.csc.bdse.app.v11.service.BookRecordV2;
+import ru.csc.bdse.app.v11.service.ServiceV2;
 import ru.csc.bdse.datasource.BerkleyDataSource;
 import ru.csc.bdse.kv.BerkleyKeyValueApi;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 

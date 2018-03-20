@@ -1,4 +1,4 @@
-package ru.csc.bdse.app.v1.service;
+package ru.csc.bdse.app.v10.model;
 
 import ru.csc.bdse.app.Record;
 
@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class BookRecordV1 implements Record {
+public class BookRecordV10 implements Record {
     private String firstName;
     private String secondName;
     private String phone;
@@ -17,15 +17,18 @@ public class BookRecordV1 implements Record {
         return new HashSet<>(Collections.singletonList(secondName.charAt(0)));
     }
 
-    public BookRecordV1(String firstName, String secondName, String phone) {
+    public BookRecordV10(String firstName, String secondName, String phone) {
         this.firstName = firstName;
         this.secondName = secondName;
         this.phone = phone;
     }
 
-    public BookRecordV1(String firstName, String secondName) {
+    public BookRecordV10(String firstName, String secondName) {
         this.firstName = firstName;
         this.secondName = secondName;
+    }
+
+    public BookRecordV10() {
     }
 
     public String getFirstName() {
@@ -42,7 +45,7 @@ public class BookRecordV1 implements Record {
 
     @Override
     public String toString() {
-        return "BookRecordV1{" +
+        return "BookRecordV10{" +
                 "firstName='" + firstName + '\'' +
                 ", secondName=" + secondName + '\'' +
                 ", phone=" + phone + '\'' +
@@ -53,7 +56,7 @@ public class BookRecordV1 implements Record {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BookRecordV1 that = (BookRecordV1) o;
+        BookRecordV10 that = (BookRecordV10) o;
         return Objects.equals(firstName, that.firstName) &&
                 Objects.equals(secondName, that.secondName) &&
                 Objects.equals(phone, that.phone);
