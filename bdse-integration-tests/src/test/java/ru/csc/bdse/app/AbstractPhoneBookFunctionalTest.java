@@ -3,6 +3,7 @@ package ru.csc.bdse.app;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Test;
+import ru.csc.bdse.app.util.NameAndSurnameCannotContainAtException;
 import ru.csc.bdse.util.Random;
 
 import java.util.HashSet;
@@ -158,5 +159,11 @@ public abstract class AbstractPhoneBookFunctionalTest<T extends Record> {
         }
 
         softAssert.assertAll();
+    }
+
+    @Test(expected = NameAndSurnameCannotContainAtException.class)
+    public void nameContainsAtCharacter() {
+        T record = getNextRandomRecordWith("@Name", "Surname");
+        addRecord(record);
     }
 }
