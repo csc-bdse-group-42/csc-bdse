@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import ru.csc.bdse.app.PhoneBookApi;
 import ru.csc.bdse.app.RecordBookProtos;
-import ru.csc.bdse.app.util.SurnameCannotStartWithAtException;
+import ru.csc.bdse.app.util.NameAndSurnameCannotContainAtException;
 import ru.csc.bdse.app.v11.model.BookRecordV11;
 import ru.csc.bdse.kv.BerkleyKeyValueApi;
 import ru.csc.bdse.util.Require;
@@ -27,7 +27,11 @@ public class PhoneBookServiceV11 implements PhoneBookApi<BookRecordV11> {
     }
 
     private String recordKey(BookRecordV11 record) {
-        return record.getSecondName() + ';' + record.getFirstName();
+        return record.getSecondName() + '@' + record.getFirstName();
+    }
+
+    private String nicknameKey(BookRecordV11 record) {
+        return "@" + record.getNickName() + "@" + recordKey(record);
     }
 
     @Override
@@ -38,8 +42,8 @@ public class PhoneBookServiceV11 implements PhoneBookApi<BookRecordV11> {
         String secondName = record.getSecondName();
         String nickName = record.getNickName();
 
-        if (secondName.startsWith("@")) {
-            throw new SurnameCannotStartWithAtException();
+        if (firstName.contains("@") || secondName.contains("@")) {
+            throw new NameAndSurnameCannotContainAtException();
         }
 
         List<String> phones = record.getPhones();
@@ -57,13 +61,13 @@ public class PhoneBookServiceV11 implements PhoneBookApi<BookRecordV11> {
         byte[] byteKey = key.getBytes();
         byte[] byteRecord = person.build().toByteArray();
 
-        berkleyKeyValueApi.put("@" + nickName, byteKey);
+        berkleyKeyValueApi.put(nicknameKey(record), byteKey);
         berkleyKeyValueApi.put(recordKey(record), byteRecord);
     }
 
     @Override
     public void delete(BookRecordV11 record) {
-        berkleyKeyValueApi.delete("@" + record.getNickName());
+        berkleyKeyValueApi.delete(nicknameKey(record));
         berkleyKeyValueApi.delete(recordKey(record));
     }
 

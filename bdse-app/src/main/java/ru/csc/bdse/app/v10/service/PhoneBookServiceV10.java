@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.csc.bdse.app.PhoneBookApi;
 import ru.csc.bdse.app.RecordBookProtos;
-import ru.csc.bdse.app.util.SurnameCannotStartWithAtException;
+import ru.csc.bdse.app.util.NameAndSurnameCannotContainAtException;
 import ru.csc.bdse.app.v10.model.BookRecordV10;
 import ru.csc.bdse.kv.BerkleyKeyValueApi;
 import ru.csc.bdse.util.Require;
@@ -27,7 +27,7 @@ public class PhoneBookServiceV10 implements PhoneBookApi<BookRecordV10> {
     }
 
     private String recordKey(BookRecordV10 record) {
-        return record.getSecondName() + ';' + record.getFirstName();
+        return record.getSecondName() + '@' + record.getFirstName();
     }
 
     @Override
@@ -38,8 +38,8 @@ public class PhoneBookServiceV10 implements PhoneBookApi<BookRecordV10> {
         String secondName = record.getSecondName();
         String phone = record.getPhone();
 
-        if (secondName.startsWith("@")) {
-            throw new SurnameCannotStartWithAtException();
+        if (firstName.contains("@") || secondName.contains("@")) {
+            throw new NameAndSurnameCannotContainAtException();
         }
 
         RecordBookProtos.Person.Builder person = RecordBookProtos.Person.newBuilder();

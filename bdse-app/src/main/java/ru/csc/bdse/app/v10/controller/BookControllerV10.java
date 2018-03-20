@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.csc.bdse.app.PhoneBookApi;
 import ru.csc.bdse.app.Record;
-import ru.csc.bdse.app.util.SurnameCannotStartWithAtException;
+import ru.csc.bdse.app.util.NameAndSurnameCannotContainAtException;
 import ru.csc.bdse.app.v10.model.BookRecordV10;
 
 import java.util.Optional;
@@ -39,9 +39,9 @@ public class BookControllerV10 {
         return phoneBookApi.get(literal);
     }
 
-    @ExceptionHandler(SurnameCannotStartWithAtException.class)
+    @ExceptionHandler(NameAndSurnameCannotContainAtException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String handle(SurnameCannotStartWithAtException e) {
-        return Optional.ofNullable(e.getMessage()).orElse("Surname cannot start with '@' character.");
+    public String handle(NameAndSurnameCannotContainAtException e) {
+        return Optional.ofNullable(e.getMessage()).orElse("Name and surname cannot contain '@' character.");
     }
 }
