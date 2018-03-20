@@ -27,7 +27,7 @@ public class PhoneBookServiceV11 implements PhoneBookApi<BookRecordV11> {
     }
 
     private String recordKey(BookRecordV11 record) {
-        return record.getSecondName() + record.getFirstName();
+        return record.getSecondName() + ';' + record.getFirstName();
     }
 
     @Override

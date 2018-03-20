@@ -18,6 +18,10 @@ GET http://localhost:8080/v1.1/person/t
 
 ###
 
+GET http://localhost:8080/v1.1/person/h
+
+###
+
 DELETE http://localhost:8080/v1.1/person/?firstName=Test2&secondName=testS
 Content-Type: application/json
 
