@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import ru.csc.bdse.app.PhoneBookApi;
 import ru.csc.bdse.app.RecordBookProtos;
+import ru.csc.bdse.app.util.SurnameCannotStartWithAtException;
 import ru.csc.bdse.app.v11.model.BookRecordV11;
 import ru.csc.bdse.kv.BerkleyKeyValueApi;
 import ru.csc.bdse.util.Require;
@@ -36,6 +37,10 @@ public class PhoneBookServiceV11 implements PhoneBookApi<BookRecordV11> {
         String firstName = record.getFirstName();
         String secondName = record.getSecondName();
         String nickName = record.getNickName();
+
+        if (secondName.startsWith("@")) {
+            throw new SurnameCannotStartWithAtException();
+        }
 
         List<String> phones = record.getPhones();
 

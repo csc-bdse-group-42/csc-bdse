@@ -7,6 +7,13 @@ Content-Type: application/json
 
 ###
 
+PUT http://localhost:8080/v1.1/person
+Content-Type: application/json
+
+{"firstName": "Test@", "secondName": "@testS", "nickName": "hacker99", "phones": ["79003433313", "79045663343"]}
+
+###
+
 GET http://localhost:8080/v1.1/person/t
 
 ###
@@ -20,6 +27,13 @@ PUT http://localhost:8080/v1.0/person
 Content-Type: application/json
 
 {"firstName": "Test2", "secondName": "testS", "phone": "79003433333"}
+
+###
+
+PUT http://localhost:8080/v1.0/person
+Content-Type: application/json
+
+{"firstName": "Test@", "secondName": "@testS", "phone": "7900343333"}
 
 ###
 
