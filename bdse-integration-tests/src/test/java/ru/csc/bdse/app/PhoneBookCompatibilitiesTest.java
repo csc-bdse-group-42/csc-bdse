@@ -5,10 +5,10 @@ import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import ru.csc.bdse.ApplicationProperties;
-import ru.csc.bdse.app.v10.service.BookRecordV1;
-import ru.csc.bdse.app.v10.service.ServiceV1;
-import ru.csc.bdse.app.v11.service.BookRecordV2;
-import ru.csc.bdse.app.v11.service.ServiceV2;
+import ru.csc.bdse.app.v10.model.BookRecordV10;
+import ru.csc.bdse.app.v10.service.PhoneBookServiceV10;
+import ru.csc.bdse.app.v11.model.BookRecordV11;
+import ru.csc.bdse.app.v11.service.PhoneBookServiceV11;
 import ru.csc.bdse.datasource.BerkleyDataSource;
 import ru.csc.bdse.kv.BerkleyKeyValueApi;
 
@@ -22,25 +22,25 @@ import java.util.Set;
  */
 public class PhoneBookCompatibilitiesTest {
 
-    private ServiceV1 serviceV1;
-    private ServiceV2 serviceV2;
+    private PhoneBookServiceV10 phoneBookServiceV10;
+    private PhoneBookServiceV11 phoneBookServiceV11;
 
     @Before
     public void init() {
         ApplicationProperties properties = new ApplicationProperties();
         properties.setDbfile("test.db");
-        serviceV1 = new ServiceV1(new BerkleyKeyValueApi(new BerkleyDataSource(properties)));
-        serviceV2 = new ServiceV2(new BerkleyKeyValueApi(new BerkleyDataSource(properties)));
+        phoneBookServiceV10 = new PhoneBookServiceV10(new BerkleyKeyValueApi(new BerkleyDataSource(properties)));
+        phoneBookServiceV11 = new PhoneBookServiceV11(new BerkleyKeyValueApi(new BerkleyDataSource(properties)));
     }
 
     @Test
     public void write10read11() {
         SoftAssertions softAssert = new SoftAssertions();
 
-        BookRecordV1 recordV1 = new BookRecordV1("Vasya", "Pupkin", "89115467734");
-        serviceV1.put(recordV1);
+        BookRecordV10 recordV1 = new BookRecordV10("Vasya", "Pupkin", "89115467734");
+        phoneBookServiceV10.put(recordV1);
 
-        Set<BookRecordV2> bookRecordV2Set = serviceV2.get('P');
+        Set<BookRecordV11> bookRecordV2Set = phoneBookServiceV11.get('P');
         softAssert.assertThat(!bookRecordV2Set.isEmpty());
     }
 
@@ -48,24 +48,24 @@ public class PhoneBookCompatibilitiesTest {
     public void write11read10() {
         SoftAssertions softAssert = new SoftAssertions();
         List<String> phones = Lists.newArrayList("89115467735", "89115467738");
-        BookRecordV2 recordV2 = new BookRecordV2("Vasya", "Pupkin", "v_pupkin", phones);
-        serviceV2.put(recordV2);
+        BookRecordV11 recordV2 = new BookRecordV11("Vasya", "Pupkin", "v_pupkin", phones);
+        phoneBookServiceV11.put(recordV2);
 
-        Set<BookRecordV1> bookRecordV1Set = serviceV1.get('P');
+        Set<BookRecordV10> bookRecordV1Set = phoneBookServiceV10.get('P');
         softAssert.assertThat(!bookRecordV1Set.isEmpty());
     }
 
     @Test
     public void write10erasure11() {
         SoftAssertions softAssert = new SoftAssertions();
-        BookRecordV1 recordV1 = new BookRecordV1("Vasya", "Pupkin", "89115467734");
-        serviceV1.put(recordV1);
+        BookRecordV10 recordV1 = new BookRecordV10("Vasya", "Pupkin", "89115467734");
+        phoneBookServiceV10.put(recordV1);
 
         List<String> phones = Lists.newArrayList("89115467735", "89115467738");
-        BookRecordV2 recordV2 = new BookRecordV2("Vasya", "Pupkin", "v_pupkin", phones);
-        serviceV2.delete(recordV2);
+        BookRecordV11 recordV2 = new BookRecordV11("Vasya", "Pupkin", "v_pupkin", phones);
+        phoneBookServiceV11.delete(recordV2);
 
-        Set<BookRecordV1> bookRecordV1Set = serviceV1.get('P');
+        Set<BookRecordV10> bookRecordV1Set = phoneBookServiceV10.get('P');
         softAssert.assertThat(bookRecordV1Set.isEmpty());
     }
 }
