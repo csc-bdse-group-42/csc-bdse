@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 @ConfigurationProperties("bdse")
 public class ApplicationProperties {
     private String dbfile;
+    private String nodes;
 
     public String getDbfile() {
         return dbfile;
@@ -14,5 +15,15 @@ public class ApplicationProperties {
 
     public void setDbfile(String dbfile) {
         this.dbfile = dbfile;
+    }
+
+    public String[] getNodes() {
+        // Splits by whitespace and commas.
+        // Example: "test, test2,test3" => { "test", "test2", "test3" }
+        return this.nodes.split("(\\s|,)+");
+    }
+
+    public void setNodes(String nodes) {
+        this.nodes = nodes;
     }
 }
