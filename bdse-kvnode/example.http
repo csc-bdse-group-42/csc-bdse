@@ -1,0 +1,15 @@
+PUT {{host}}/key-value/test
+Content-Type: application/json
+
+{"test": true}
+
+###
+
+GET {{host}}/key-value?prefix=t
+
+###
+
+GET {{host}}/key-value/test
+
+###
+
