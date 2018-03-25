@@ -22,7 +22,7 @@ public class BerkleyKeyValueApi implements KeyValueApi {
     private NodeInfo nodeInfo;
 
     @Autowired
-    BerkleyKeyValueApi(BerkleyDataSource berkleyDataSource) {
+    public BerkleyKeyValueApi(BerkleyDataSource berkleyDataSource) {
         this.berkleyDataSource = berkleyDataSource;
         this.nodeInfo = new NodeInfo("UNKNOWN", NodeStatus.UP);
     }
