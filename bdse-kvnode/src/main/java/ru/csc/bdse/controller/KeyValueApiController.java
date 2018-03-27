@@ -1,6 +1,9 @@
 package ru.csc.bdse.controller;
 
+import feign.Feign;
+import feign.RequestLine;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.csc.bdse.kv.KeyValueApi;
@@ -8,9 +11,7 @@ import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
 import ru.csc.bdse.util.IllegalNodeStateException;
 
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Provides HTTP API for the storage unit
@@ -21,15 +22,46 @@ import java.util.Set;
 public class KeyValueApiController {
     private final KeyValueApi keyValueApi;
 
+    @Value("${node.master}")
+    private boolean isMaster;
+
+    private List<String> slaves;
+
+
+    private int port;
+
     @Autowired
-    public KeyValueApiController(final KeyValueApi keyValueApi) {
+    public KeyValueApiController(final KeyValueApi keyValueApi,
+                                 @Value("${bdse.nodes}") String nodesString,
+                                 @Value("${server.port}") int port) {
         this.keyValueApi = keyValueApi;
+        this.port = port;
+
+        this.slaves = new ArrayList<>();
+        if (nodesString != null && isMaster) {
+            String[] baseUrls = nodesString.split("(\\s|,)+");
+            for (int i = 0; i < baseUrls.length; i++) {
+                if (!baseUrls[i].split(":")[1].equals(String.valueOf(port))) {
+                    slaves.add(baseUrls[i]);
+                }
+            }
+        }
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/key-value/{key}")
     public void put(@PathVariable final String key,
                     @RequestBody final byte[] value) {
         keyValueApi.put(key, value);
+        if (isMaster) {
+            slaves.forEach(slave -> Feign.builder()
+                    .target(SlaveClient.class, "http://" + slave));
+        }
+    }
+
+    interface SlaveClient {
+        @RequestLine("/key-value/{key}")
+        void put(@PathVariable final String key,
+                 @RequestBody final byte[] value);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/key-value/{key}")
