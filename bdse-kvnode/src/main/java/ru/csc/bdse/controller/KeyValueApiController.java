@@ -65,23 +65,23 @@ public class KeyValueApiController {
                        @RequestBody final byte[] value) throws InterruptedException, ExecutionException {
 
 
-        Future<Boolean> masterFuture = CompletableFuture.supplyAsync(
+        Future<Boolean> controlFuture = CompletableFuture.supplyAsync(
                 () -> {
-                    boolean masterStatus = keyValueApi.put(key, value);
+                    boolean controlStatus = keyValueApi.put(key, value);
 
-                    return masterStatus;
+                    return controlStatus;
                 },
                 threadPool
         );
 
-        boolean masterStatus;
+        boolean controlStatus;
         try {
-            masterStatus = masterFuture.get(2, TimeUnit.SECONDS);
+            controlStatus = controlFuture.get(2, TimeUnit.SECONDS);
         } catch (TimeoutException e) {
-            masterStatus = false;
+            controlStatus = false;
         }
 
-        if (masterStatus){
+        if (controlStatus){
             numberOfOK += 1;
         }
 
@@ -122,7 +122,7 @@ public class KeyValueApiController {
             throw new IllegalStateException("Error while recording");
         }
 
-        return masterStatus;
+        return controlStatus;
     }
 
     interface SlaveClient {
