@@ -27,7 +27,6 @@ public class KeyValueApiController {
 
     private List<String> slaves;
 
-
     private int port;
 
     @Autowired
@@ -36,13 +35,13 @@ public class KeyValueApiController {
                                  @Value("${server.port}") int port) {
         this.keyValueApi = keyValueApi;
         this.port = port;
-
         this.slaves = new ArrayList<>();
+
         if (nodesString != null && isMaster) {
             String[] baseUrls = nodesString.split("(\\s|,)+");
-            for (int i = 0; i < baseUrls.length; i++) {
-                if (!baseUrls[i].split(":")[1].equals(String.valueOf(port))) {
-                    slaves.add(baseUrls[i]);
+            for (String baseUrl : baseUrls) {
+                if (!baseUrl.split(":")[1].equals(String.valueOf(port))) {
+                    slaves.add(baseUrl);
                 }
             }
         }
