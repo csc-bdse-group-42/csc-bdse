@@ -12,6 +12,7 @@ import ru.csc.bdse.kv.NodeInfo;
 import ru.csc.bdse.util.IllegalNodeStateException;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * Provides HTTP API for the storage unit
@@ -29,6 +30,16 @@ public class KeyValueApiController {
 
     private int port;
 
+    @Value("${node.timeout}")
+    private long timeout;
+
+    private ExecutorService threadPool;
+
+    private int numberOfOK;
+
+    @Value("${node.WCL}")
+    private int WCL;
+
     @Autowired
     public KeyValueApiController(final KeyValueApi keyValueApi,
                                  @Value("${bdse.nodes}") String nodesString,
@@ -36,6 +47,8 @@ public class KeyValueApiController {
         this.keyValueApi = keyValueApi;
         this.port = port;
         this.slaves = new ArrayList<>();
+        this.threadPool = Executors.newFixedThreadPool(8);
+        this.numberOfOK = 0;
 
         if (nodesString != null && isMaster) {
             String[] baseUrls = nodesString.split("(\\s|,)+");
@@ -48,19 +61,74 @@ public class KeyValueApiController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/key-value/{key}")
-    public void put(@PathVariable final String key,
-                    @RequestBody final byte[] value) {
-        keyValueApi.put(key, value);
-        if (isMaster) {
-            slaves.forEach(slave -> Feign.builder()
-                    .target(SlaveClient.class, "http://" + slave));
+    public boolean put(@PathVariable final String key,
+                       @RequestBody final byte[] value) throws InterruptedException, ExecutionException {
+
+
+        Future<Boolean> masterFuture = CompletableFuture.supplyAsync(
+                () -> {
+                    boolean masterStatus = keyValueApi.put(key, value);
+
+                    return masterStatus;
+                },
+                threadPool
+        );
+
+        boolean masterStatus;
+        try {
+            masterStatus = masterFuture.get(2, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            masterStatus = false;
         }
+
+        if (masterStatus){
+            numberOfOK += 1;
+        }
+
+        if (isMaster) {
+
+            List<Future<Boolean>> futures = new ArrayList<>();
+
+            for (String slave : slaves) {
+                futures.add(
+                        CompletableFuture.supplyAsync(
+                                () -> {
+                                    SlaveClient slaveClient = Feign.builder().target(SlaveClient.class, "http://" + slave);
+                                    boolean slaveStatus = slaveClient.put(key, value);
+
+                                    return slaveStatus;
+                                },
+                                threadPool
+                        ));
+            }
+
+            for (Future<Boolean> future : futures) {
+                boolean slaveStatus;
+                try {
+                    slaveStatus = future.get(2, TimeUnit.SECONDS);
+                } catch (TimeoutException e) {
+                    slaveStatus = false;
+                }
+
+                if (slaveStatus){
+                    numberOfOK += 1;
+                }
+            }
+
+            threadPool.shutdown();
+        }
+
+        if (numberOfOK < WCL){
+            throw new IllegalStateException("Error while recording");
+        }
+
+        return masterStatus;
     }
 
     interface SlaveClient {
         @RequestLine("/key-value/{key}")
-        void put(@PathVariable final String key,
-                 @RequestBody final byte[] value);
+        boolean put(@PathVariable final String key,
+                    @RequestBody final byte[] value);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/key-value/{key}")
@@ -86,7 +154,9 @@ public class KeyValueApiController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/action/{node}/{action}")
     public void action(@PathVariable final String node,
-                       @PathVariable final NodeAction action) { keyValueApi.action(node, action); }
+                       @PathVariable final NodeAction action) {
+        keyValueApi.action(node, action);
+    }
 
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)

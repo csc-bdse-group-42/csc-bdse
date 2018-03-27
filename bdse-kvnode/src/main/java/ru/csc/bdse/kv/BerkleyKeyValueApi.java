@@ -36,7 +36,7 @@ public class BerkleyKeyValueApi implements KeyValueApi {
      * Puts value to the storage by specified key.
      */
     @Override
-    public void put(String key, byte[] value) {
+    public boolean put(String key, byte[] value) {
         Require.nonNull(key, "null key");
         Require.nonNull(value, "null value");
 
@@ -44,7 +44,9 @@ public class BerkleyKeyValueApi implements KeyValueApi {
 
         KeyValueRecord record = new KeyValueRecord(key, value);
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
-        primaryIndex.put(record);
+        KeyValueRecord putRecord = primaryIndex.put(record);
+
+        return putRecord != null;
     }
 
     /**
