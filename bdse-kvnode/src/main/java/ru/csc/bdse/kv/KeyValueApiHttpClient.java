@@ -35,7 +35,7 @@ public class KeyValueApiHttpClient implements KeyValueApi {
     }
 
     @Override
-    public void put(String key, byte[] value) {
+    public String put(String key, byte[] value) {
         Require.nonNull(key, "null key");
         Require.nonNull(value, "null value");
 
@@ -44,6 +44,8 @@ public class KeyValueApiHttpClient implements KeyValueApi {
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw new RuntimeException("Response error: " + responseEntity);
         }
+
+        return "OK";
     }
 
     @Override

@@ -25,10 +25,12 @@ public class InMemoryKeyValueApi implements KeyValueApi {
     }
 
     @Override
-    public void put(final String key, final byte[] value) {
+    public String put(final String key, final byte[] value) {
         Require.nonEmpty(key, "empty key");
         Require.nonNull(value, "null value");
         map.put(key, value);
+
+        return "OK";
     }
 
     @Override

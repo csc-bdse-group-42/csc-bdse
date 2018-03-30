@@ -11,7 +11,7 @@ public interface KeyValueApi {
     /**
      * Puts value to the storage by specified key.
      */
-    boolean put(String key, byte[] value);
+    String put(String key, byte[] value);
 
     /**
      * Returns value associated with specified key.

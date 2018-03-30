@@ -23,10 +23,7 @@ import java.util.concurrent.*;
 public class KeyValueApiController {
     private final KeyValueApi keyValueApi;
 
-    @Value("${node.master}")
-    private boolean isMaster;
-
-    private List<String> slaves;
+    private String[] nodeUrls;
 
     private int port;
 
@@ -46,89 +43,68 @@ public class KeyValueApiController {
                                  @Value("${server.port}") int port) {
         this.keyValueApi = keyValueApi;
         this.port = port;
-        this.slaves = new ArrayList<>();
         this.threadPool = Executors.newFixedThreadPool(8);
         this.numberOfOK = 0;
 
-        if (nodesString != null && isMaster) {
-            String[] baseUrls = nodesString.split("(\\s|,)+");
-            for (String baseUrl : baseUrls) {
-                if (!baseUrl.split(":")[1].equals(String.valueOf(port))) {
-                    slaves.add(baseUrl);
-                }
-            }
+        if (nodesString != null) {
+            nodeUrls = nodesString.split("(\\s|,)+");
         }
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, value = "/key-value-inner/{key}")
+    public String putInner(@PathVariable final String key,
+                           @RequestBody final byte[] value) {
+        String nodeStatus = keyValueApi.put(key, value);
+
+        return nodeStatus;
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/key-value/{key}")
-    public boolean put(@PathVariable final String key,
-                       @RequestBody final byte[] value) throws InterruptedException, ExecutionException {
+    public String putOuter(@PathVariable final String key,
+                           @RequestBody final byte[] value) throws InterruptedException, ExecutionException {
 
+        List<Future<String>> futures = new ArrayList<>();
 
-        Future<Boolean> controlFuture = CompletableFuture.supplyAsync(
-                () -> {
-                    boolean controlStatus = keyValueApi.put(key, value);
+        for (String nodeUrl : nodeUrls) {
+            futures.add(
+                    CompletableFuture.supplyAsync(
+                            () -> {
+                                NodeClient nodeClient = Feign.builder().target(NodeClient.class, "http://" + nodeUrl);
+                                String nodeStatus = nodeClient.putInner(key, value);
 
-                    return controlStatus;
-                },
-                threadPool
-        );
-
-        boolean controlStatus;
-        try {
-            controlStatus = controlFuture.get(2, TimeUnit.SECONDS);
-        } catch (TimeoutException e) {
-            controlStatus = false;
+                                return nodeStatus;
+                            },
+                            threadPool
+                    ));
         }
 
-        if (controlStatus){
-            numberOfOK += 1;
-        }
-
-        if (isMaster) {
-
-            List<Future<Boolean>> futures = new ArrayList<>();
-
-            for (String slave : slaves) {
-                futures.add(
-                        CompletableFuture.supplyAsync(
-                                () -> {
-                                    SlaveClient slaveClient = Feign.builder().target(SlaveClient.class, "http://" + slave);
-                                    boolean slaveStatus = slaveClient.put(key, value);
-
-                                    return slaveStatus;
-                                },
-                                threadPool
-                        ));
+        for (Future<String> future : futures) {
+            String nodeStatus;
+            try {
+                nodeStatus = future.get(2, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                nodeStatus = "ABORT";
             }
 
-            for (Future<Boolean> future : futures) {
-                boolean slaveStatus;
-                try {
-                    slaveStatus = future.get(2, TimeUnit.SECONDS);
-                } catch (TimeoutException e) {
-                    slaveStatus = false;
-                }
-
-                if (slaveStatus){
-                    numberOfOK += 1;
-                }
+            if (nodeStatus.equals("COMMIT")) {
+                numberOfOK += 1;
             }
-
-            threadPool.shutdown();
         }
 
-        if (numberOfOK < WCL){
+        threadPool.shutdown();
+
+
+        if (numberOfOK < WCL) {
             throw new IllegalStateException("Error while recording");
         }
 
-        return controlStatus;
+        return "COMMIT";
     }
 
-    interface SlaveClient {
-        @RequestLine("/key-value/{key}")
-        boolean put(@PathVariable final String key,
-                    @RequestBody final byte[] value);
+    interface NodeClient {
+        @RequestLine("PUT /key-value-inner/{key}")
+        String putInner(@PathVariable final String key,
+                        @RequestBody final byte[] value);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/key-value/{key}")
