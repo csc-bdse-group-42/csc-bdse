@@ -1,6 +1,7 @@
 package ru.csc.bdse.controller;
 
 import feign.Feign;
+import feign.Param;
 import feign.RequestLine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -91,9 +92,6 @@ public class KeyValueApiController {
             }
         }
 
-        threadPool.shutdown();
-
-
         if (numberOfOK < WCL) {
             throw new IllegalStateException("Error while recording");
         }
@@ -103,8 +101,7 @@ public class KeyValueApiController {
 
     interface NodeClient {
         @RequestLine("PUT /key-value-inner/{key}")
-        String putInner(@PathVariable final String key,
-                        @RequestBody final byte[] value);
+        String putInner(@Param("key") final String key, final byte[] value);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/key-value/{key}")

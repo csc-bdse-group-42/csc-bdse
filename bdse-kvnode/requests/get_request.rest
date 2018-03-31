@@ -1,0 +1,18 @@
+GET
+http://localhost:8001/key-value/100
+
+%%%
+
+# Duration: 22 ms
+# URL: http://localhost:8001/key-value/100
+
+# HTTP/1.1 200
+
+@Content-Type: application/octet-stream
+@Content-Length: 46
+@Date: Sat, 31 Mar 2018 20:38:26 GMT
+
+Content-Type: application/json
+{"FML": FML}
+
+

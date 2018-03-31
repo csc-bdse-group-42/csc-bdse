@@ -1,0 +1,18 @@
+PUT
+http://localhost:8002/key-value/test
+Content-Type: application/json
+{"test": true}
+
+
+%%%
+
+# Duration: 123 ms
+# URL: http://localhost:8002/key-value/100
+
+# HTTP/1.1 200
+
+@Content-Type: text/plain;charset=UTF-8
+@Content-Length: 6
+@Date: Sat, 31 Mar 2018 20:36:15 GMT
+
+COMMIT
