@@ -1,9 +1,11 @@
 package ru.csc.bdse.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.csc.bdse.kv.ReplicatedKeyValueApi;
 import ru.csc.bdse.model.KeyValueRecord;
+import ru.csc.bdse.util.IllegalNodeStateException;
 
 import java.util.*;
 
@@ -35,4 +37,8 @@ public class PublicKeyValueApiController {
         throw new IllegalStateException();
     }
 
+    @RequestMapping(method = RequestMethod.GET)
+    public Set<String> getKeys(@RequestParam("prefix") String prefix) {
+        return replicatedKeyValueApi.getKeys(prefix);
+    }
 }
