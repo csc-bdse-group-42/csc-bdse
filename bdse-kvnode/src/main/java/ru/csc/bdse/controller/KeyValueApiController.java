@@ -3,7 +3,7 @@ package ru.csc.bdse.controller;
 import feign.*;
 import feign.codec.DecodeException;
 import feign.codec.Decoder;
-import feign.gson.GsonDecoder;
+import feign.jackson.JacksonDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -137,7 +137,7 @@ public class KeyValueApiController {
                     CompletableFuture.supplyAsync(
                             () -> {
                                 // todo: Feign не может распрарсить JSON объект KeyValueRecord, нужно его верно настроить или иначе распарсить
-                                NodeClient nodeClient = Feign.builder().decoder(new GsonDecoder()).target(NodeClient.class, "http://" + nodeUrl);
+                                NodeClient nodeClient = Feign.builder().decoder(new JacksonDecoder()).target(NodeClient.class, "http://" + nodeUrl);
                                 KeyValueRecord optionalData = nodeClient.getInner(key);
 
                                 return optionalData;
