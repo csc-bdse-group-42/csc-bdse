@@ -1,5 +1,7 @@
 package ru.csc.bdse.kv;
 
+import ru.csc.bdse.model.KeyValueRecord;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -16,7 +18,7 @@ public interface KeyValueApi {
     /**
      * Returns value associated with specified key.
      */
-    Optional<byte[]> get(String key);
+    Optional<KeyValueRecord> get(String key);
 
     /**
      * Returns all keys with specified prefix.

@@ -57,7 +57,7 @@ public class BerkleyKeyValueApi implements KeyValueApi {
      * Returns value associated with specified key.
      */
     @Override
-    public Optional<byte[]> get(String key) {
+    public Optional<KeyValueRecord> get(String key) {
         Require.nonNull(key, "null key");
 
         this.checkNodeStatus();
@@ -67,7 +67,7 @@ public class BerkleyKeyValueApi implements KeyValueApi {
         if (record == null) {
             return Optional.empty();
         }
-        return Optional.of(record.getData());
+        return Optional.of(record);
     }
 
     /**

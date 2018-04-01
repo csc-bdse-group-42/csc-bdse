@@ -1,17 +1,24 @@
 package ru.csc.bdse.controller;
 
-import feign.Feign;
-import feign.Param;
-import feign.RequestLine;
+import feign.*;
+import feign.codec.DecodeException;
+import feign.codec.Decoder;
+import feign.gson.GsonDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.csc.bdse.kv.KeyValueApi;
 import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
+import ru.csc.bdse.model.KeyValueRecord;
+import ru.csc.bdse.resolver.Resolver;
 import ru.csc.bdse.util.IllegalNodeStateException;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -33,10 +40,11 @@ public class KeyValueApiController {
 
     private ExecutorService threadPool;
 
-    private int numberOfOK;
-
     @Value("${node.WCL}")
     private int WCL;
+
+    @Value("${node.RCL}")
+    private int RCL;
 
     @Autowired
     public KeyValueApiController(final KeyValueApi keyValueApi,
@@ -45,7 +53,6 @@ public class KeyValueApiController {
         this.keyValueApi = keyValueApi;
         this.port = port;
         this.threadPool = Executors.newFixedThreadPool(8);
-        this.numberOfOK = 0;
 
         if (nodesString != null) {
             nodeUrls = nodesString.split("(\\s|,)+");
@@ -63,6 +70,8 @@ public class KeyValueApiController {
     @RequestMapping(method = RequestMethod.PUT, value = "/key-value/{key}")
     public String putOuter(@PathVariable final String key,
                            @RequestBody final byte[] value) throws InterruptedException, ExecutionException {
+
+        int numberOfOK = 0;
 
         List<Future<String>> futures = new ArrayList<>();
 
@@ -93,7 +102,7 @@ public class KeyValueApiController {
         }
 
         if (numberOfOK < WCL) {
-            throw new IllegalStateException("Error while recording");
+            throw new IllegalStateException("Time error while recording");
         }
 
         return "COMMIT";
@@ -102,12 +111,70 @@ public class KeyValueApiController {
     interface NodeClient {
         @RequestLine("PUT /key-value-inner/{key}")
         String putInner(@Param("key") final String key, final byte[] value);
+
+        @RequestLine("GET /key-value-inner/{key}")
+        @Headers("Content-Type: application/json")
+        KeyValueRecord getInner(@Param("key") final String key);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/key-value-inner/{key}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody KeyValueRecord getInner(@PathVariable final String key) {
+        KeyValueRecord keyValueRecord = keyValueApi.get(key)
+                .orElseThrow(() -> new NoSuchElementException(key));
+
+        return keyValueRecord;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/key-value/{key}")
-    public byte[] get(@PathVariable final String key) {
-        return keyValueApi.get(key)
-                .orElseThrow(() -> new NoSuchElementException(key));
+    public byte[] getOuter(@PathVariable final String key) throws ExecutionException, InterruptedException {
+
+        int numberOfOK = 0;
+
+        List<Future<KeyValueRecord>> futures = new ArrayList<>();
+
+        for (String nodeUrl : nodeUrls) {
+            futures.add(
+                    CompletableFuture.supplyAsync(
+                            () -> {
+                                // todo: Feign не может распрарсить JSON объект KeyValueRecord, нужно его верно настроить или иначе распарсить
+                                NodeClient nodeClient = Feign.builder().decoder(new GsonDecoder()).target(NodeClient.class, "http://" + nodeUrl);
+                                KeyValueRecord optionalData = nodeClient.getInner(key);
+
+                                return optionalData;
+                            },
+                            threadPool
+                    ));
+        }
+
+        Set<KeyValueRecord> records = new HashSet<>();
+
+        for (Future<KeyValueRecord> future : futures) {
+            KeyValueRecord optionalData;
+            try {
+                optionalData = future.get(10, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                optionalData = null;
+            }
+
+            if (optionalData != null) {
+                System.out.println("Read OK");
+                numberOfOK += 1;
+                records.add(optionalData);
+            }
+        }
+
+        if (numberOfOK < RCL) {
+            throw new IllegalStateException("Time error while reading");
+        }
+
+        Resolver resolver = new Resolver();
+        Optional<KeyValueRecord> record = resolver.resolve(records);
+
+        if (record.isPresent()) {
+            return record.get().getData();
+        }
+
+        throw new IllegalStateException();
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/key-value")

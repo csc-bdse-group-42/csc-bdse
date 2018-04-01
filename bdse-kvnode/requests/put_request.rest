@@ -1,18 +1,18 @@
 PUT
-http://localhost:8002/key-value/test
+http://localhost:8001/key-value/smt
 Content-Type: application/json
-{"test": true}
+{"smt": true}
 
 
 %%%
 
-# Duration: 123 ms
-# URL: http://localhost:8002/key-value/100
+# Duration: 278 ms
+# URL: http://localhost:8001/key-value/smt
 
 # HTTP/1.1 200
 
 @Content-Type: text/plain;charset=UTF-8
 @Content-Length: 6
-@Date: Sat, 31 Mar 2018 20:36:15 GMT
+@Date: Sun, 01 Apr 2018 11:26:37 GMT
 
 COMMIT

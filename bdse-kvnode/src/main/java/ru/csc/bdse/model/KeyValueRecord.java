@@ -3,6 +3,8 @@ package ru.csc.bdse.model;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
+import java.util.Arrays;
+
 @Entity
 public class KeyValueRecord {
     @PrimaryKey
@@ -47,5 +49,15 @@ public class KeyValueRecord {
 
     public void setData(byte[] data) {
         this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return "KeyValueRecord{" +
+                "key='" + key + '\'' +
+                ", isDeleted=" + isDeleted +
+                ", timestamp=" + timestamp +
+                ", data=" + Arrays.toString(data) +
+                '}';
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import ru.csc.bdse.model.KeyValueRecord;
 import ru.csc.bdse.util.Constants;
 import ru.csc.bdse.util.Encoding;
 import ru.csc.bdse.util.IllegalNodeStateException;
@@ -45,18 +46,18 @@ public class KeyValueApiHttpClient implements KeyValueApi {
             throw new RuntimeException("Response error: " + responseEntity);
         }
 
-        return "OK";
+        return "COMMIT";
     }
 
     @Override
-    public Optional<byte[]> get(String key) {
+    public Optional<KeyValueRecord> get(String key) {
         Require.nonNull(key, "null key");
 
         final String url = baseUrl + "/key-value/" + key;
         final ResponseEntity<byte[]> responseEntity = request(url, HttpMethod.GET, Constants.EMPTY_BYTE_ARRAY);
         switch (responseEntity.getStatusCode()) {
             case OK:
-                return Optional.of(responseEntity.getBody());
+                return Optional.of(new KeyValueRecord(key, responseEntity.getBody()));
             case NOT_FOUND:
                 return Optional.empty();
             default:
