@@ -131,7 +131,46 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
      */
     @Override
     public Set<String> getKeys(String prefix) {
-        return null;
+        int numberOfOK = 0;
+
+        List<Future<Set<String>>> futures = new ArrayList<>();
+
+        for (String nodeUrl : nodeUrls) {
+            futures.add(
+                    CompletableFuture.supplyAsync(
+                            () -> {
+                                NodeClient nodeClient = Feign.builder().decoder(new JacksonDecoder()).target(NodeClient.class, nodeUrl);
+                                Set<String> record = nodeClient.getsInner(prefix);
+
+                                return record;
+                            },
+                            threadPool
+                    ));
+        }
+
+        Set<Set<String>> records = new HashSet<>();
+
+        for (Future<Set<String>> future : futures) {
+            Set<String> record;
+            try {
+                record = future.get(this.timeout * 5, TimeUnit.SECONDS);
+            } catch (TimeoutException | InterruptedException | ExecutionException e) {
+                record = null;
+            }
+
+            if (record != null) {
+                numberOfOK += 1;
+                records.add(record);
+            }
+        }
+
+        if (numberOfOK < RCL) {
+            throw new IllegalStateException("Time error while reading");
+        }
+
+        Resolver resolver = new Resolver();
+
+        return resolver.resolveKeys(records);
     }
 
     /**

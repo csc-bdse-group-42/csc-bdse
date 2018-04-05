@@ -1,5 +1,6 @@
 package ru.csc.bdse.resolver;
 
+import com.google.common.collect.Sets;
 import ru.csc.bdse.model.KeyValueRecord;
 
 import java.util.*;
@@ -40,7 +41,9 @@ public class Resolver implements ConflictResolver {
     }
 
     @Override
-    public Set<String> resolveKeys(Set<Set<String>> in) {
-        return null;
+    public Set<String> resolveKeys(Set<Set<String>> setOfSetKeys) {
+        Set<String> result = new HashSet<>();
+
+        return setOfSetKeys.stream().reduce(result, Sets::union);
     }
 }
