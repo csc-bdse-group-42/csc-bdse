@@ -20,6 +20,14 @@ public class KeyValueRecord {
     public KeyValueRecord(String key, byte[] data) {
         this.key = key;
         this.data = data;
+        this.isDeleted = false;
+        this.timestamp = System.currentTimeMillis();
+    }
+
+    public KeyValueRecord(String key, byte[] data, boolean isDeleted) {
+        this.key = key;
+        this.data = data;
+        this.isDeleted = isDeleted;
         this.timestamp = System.currentTimeMillis();
     }
 

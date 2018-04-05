@@ -99,7 +99,11 @@ public class BerkleyKeyValueApi implements KeyValueApi {
         this.checkNodeStatus();
 
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
-        primaryIndex.delete(key);
+        KeyValueRecord record = primaryIndex.get(key);
+        byte[] value = record.getData();
+
+        KeyValueRecord deletedRecord = new KeyValueRecord(key, value, true);
+        primaryIndex.put(deletedRecord);
     }
 
     /**

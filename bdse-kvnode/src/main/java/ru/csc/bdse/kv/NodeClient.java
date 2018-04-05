@@ -3,6 +3,9 @@ package ru.csc.bdse.kv;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.csc.bdse.model.KeyValueRecord;
 
@@ -19,4 +22,7 @@ interface NodeClient {
     @RequestLine("GET /key-value-inner/")
     @Headers("Content-Type: application/json")
     Set<String> getsInner(@RequestParam("prefix") final String prefix);
+
+    @RequestMapping("DELETE /key-value-inner/{key}")
+    void delete(@PathVariable final String key);
 }

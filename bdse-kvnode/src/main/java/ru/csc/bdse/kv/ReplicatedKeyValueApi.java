@@ -140,9 +140,9 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
                     CompletableFuture.supplyAsync(
                             () -> {
                                 NodeClient nodeClient = Feign.builder().decoder(new JacksonDecoder()).target(NodeClient.class, nodeUrl);
-                                Set<String> record = nodeClient.getsInner(prefix);
+                                Set<String> keys = nodeClient.getsInner(prefix);
 
-                                return record;
+                                return keys;
                             },
                             threadPool
                     ));
@@ -151,16 +151,16 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
         Set<Set<String>> records = new HashSet<>();
 
         for (Future<Set<String>> future : futures) {
-            Set<String> record;
+            Set<String> keys;
             try {
-                record = future.get(this.timeout * 5, TimeUnit.SECONDS);
+                keys = future.get(this.timeout * 5, TimeUnit.SECONDS);
             } catch (TimeoutException | InterruptedException | ExecutionException e) {
-                record = null;
+                keys = null;
             }
 
-            if (record != null) {
+            if (keys != null) {
                 numberOfOK += 1;
-                records.add(record);
+                records.add(keys);
             }
         }
 

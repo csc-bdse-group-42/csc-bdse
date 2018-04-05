@@ -41,4 +41,9 @@ public class PublicKeyValueApiController {
     public Set<String> getKeys(@RequestParam("prefix") String prefix) {
         return replicatedKeyValueApi.getKeys(prefix);
     }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/{key}")
+    public void delete(@PathVariable final String key) {
+        replicatedKeyValueApi.delete(key);
+    }
 }
