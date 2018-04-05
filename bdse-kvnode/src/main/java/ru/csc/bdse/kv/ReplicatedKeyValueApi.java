@@ -99,7 +99,7 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
                     ));
         }
 
-        Set<KeyValueRecord> records = new HashSet<>();
+        Set<KeyValueRecord> allRecords = new HashSet<>();
 
         for (Future<KeyValueRecord> future : futures) {
             KeyValueRecord record;
@@ -111,7 +111,7 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
 
             if (record != null) {
                 numberOfOK += 1;
-                records.add(record);
+                allRecords.add(record);
             }
         }
 
@@ -121,7 +121,7 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
 
         Resolver resolver = new Resolver();
 
-        return resolver.resolve(records);
+        return resolver.resolve(allRecords);
     }
 
     /**

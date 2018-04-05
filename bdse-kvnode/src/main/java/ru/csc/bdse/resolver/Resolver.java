@@ -33,7 +33,9 @@ public class Resolver implements ConflictResolver {
             if (maxEntry.isPresent()) {
                 resultData = maxEntry.get().getValue().get(0);
 
-                return Optional.of(resultData);
+                if (!resultData.isDeleted()) {
+                    return Optional.of(resultData);
+                }
             }
         }
 
