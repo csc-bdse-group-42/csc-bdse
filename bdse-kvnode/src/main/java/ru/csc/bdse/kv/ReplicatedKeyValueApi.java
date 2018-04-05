@@ -180,7 +180,38 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
      */
     @Override
     public void delete(String key) {
+        int numberOfOK = 0;
 
+        List<Future<String>> futures = new ArrayList<>();
+
+        for (String nodeUrl : nodeUrls) {
+            futures.add(
+                    CompletableFuture.supplyAsync(
+                            () -> {
+                                NodeClient nodeClient = Feign.builder().decoder(new JacksonDecoder()).target(NodeClient.class, nodeUrl);
+                                nodeClient.delete(key);
+                                return "COMMIT";
+                            },
+                            threadPool
+                    ));
+        }
+        
+        for (Future<String> future : futures) {
+            String keys;
+            try {
+                keys = future.get(this.timeout * 5, TimeUnit.SECONDS);
+            } catch (TimeoutException | InterruptedException | ExecutionException e) {
+                keys = null;
+            }
+
+            if (keys != null) {
+                numberOfOK += 1;
+            }
+        }
+
+        if (numberOfOK < RCL) {
+            throw new IllegalStateException("Time error while deleting");
+        }
     }
 
     /**
