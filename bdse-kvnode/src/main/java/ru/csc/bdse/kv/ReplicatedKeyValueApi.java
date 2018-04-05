@@ -195,16 +195,16 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
                             threadPool
                     ));
         }
-        
+
         for (Future<String> future : futures) {
-            String keys;
+            String message;
             try {
-                keys = future.get(this.timeout * 5, TimeUnit.SECONDS);
+                message = future.get(this.timeout * 5, TimeUnit.SECONDS);
             } catch (TimeoutException | InterruptedException | ExecutionException e) {
-                keys = null;
+                message = null;
             }
 
-            if (keys != null) {
+            if (message != null) {
                 numberOfOK += 1;
             }
         }
