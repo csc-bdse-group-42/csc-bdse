@@ -209,7 +209,7 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
             }
         }
 
-        if (numberOfOK < RCL) {
+        if (numberOfOK < WCL) {
             throw new IllegalStateException("Time error while deleting");
         }
     }
