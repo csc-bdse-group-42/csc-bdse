@@ -8,8 +8,10 @@ import java.util.stream.Collectors;
 
 public class Resolver implements ConflictResolver {
     @Override
-    public Optional<KeyValueRecord> resolve(Set<KeyValueRecord> keyValueRecords) {
+    public Optional<KeyValueRecord> resolve(Set<KeyValueRecord> allKeyValueRecords) {
         KeyValueRecord resultData;
+
+        Set<KeyValueRecord> keyValueRecords = allKeyValueRecords.stream().filter(r -> !r.isDeleted()).collect(Collectors.toCollection(HashSet::new));
 
         Optional<KeyValueRecord> maxKeyValueRecord = keyValueRecords.stream().max(Comparator.comparing(KeyValueRecord::getTimestamp));
         if (maxKeyValueRecord.isPresent()) {
@@ -33,9 +35,7 @@ public class Resolver implements ConflictResolver {
             if (maxEntry.isPresent()) {
                 resultData = maxEntry.get().getValue().get(0);
 
-                if (!resultData.isDeleted()) {
-                    return Optional.of(resultData);
-                }
+                return Optional.of(resultData);
             }
         }
 
