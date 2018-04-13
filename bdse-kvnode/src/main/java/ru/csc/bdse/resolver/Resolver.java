@@ -1,51 +1,51 @@
 package ru.csc.bdse.resolver;
 
-import com.google.common.collect.Sets;
 import ru.csc.bdse.model.KeyValueRecord;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.counting;
 
 public class Resolver implements ConflictResolver {
     @Override
-    public Optional<KeyValueRecord> resolve(Set<KeyValueRecord> allKeyValueRecords) {
-        KeyValueRecord resultData;
-
+    public Optional<KeyValueRecord> resolve(List<KeyValueRecord> allKeyValueRecords) {
         Set<KeyValueRecord> keyValueRecords = allKeyValueRecords.stream().filter(r -> !r.isDeleted()).collect(Collectors.toCollection(HashSet::new));
 
         Optional<KeyValueRecord> maxKeyValueRecord = keyValueRecords.stream().max(Comparator.comparing(KeyValueRecord::getTimestamp));
+
+
         if (maxKeyValueRecord.isPresent()) {
             long maxTime = maxKeyValueRecord.get().getTimestamp();
-            Map<byte[], List<KeyValueRecord>> mapGroupByData = keyValueRecords.stream().
-                    filter(t -> t.getTimestamp() == maxTime).
-                    collect(Collectors.groupingBy(KeyValueRecord::getData));
+            long elementsWithMaxTime = keyValueRecords.stream().filter(t -> t.getTimestamp() == maxTime).count();
 
-            long countUniqueListSize = mapGroupByData.entrySet().stream().map(entry -> entry.getValue().size()).distinct().count();
+            if (elementsWithMaxTime > 1) {
+                final Map<KeyValueRecord, Long> frequencies = keyValueRecords.stream()
+                        .filter(t -> t.getTimestamp() == maxTime)
+                        .collect(Collectors.groupingBy(Function.identity(), counting()));
 
-            Optional<Map.Entry<byte[], List<KeyValueRecord>>> maxEntry;
+                final Comparator<Map.Entry<KeyValueRecord, Long>> comparator = Comparator
+                        .comparingLong((Map.Entry<KeyValueRecord, Long> e) -> e.getKey().getTimestamp())
+                        .thenComparingLong(Map.Entry::getValue)
+                        .thenComparing((Map.Entry<KeyValueRecord, Long> e) -> e.getKey().getKey());
 
-            if (countUniqueListSize == 1) {
-                maxEntry = mapGroupByData.entrySet().stream().
-                        max(Comparator.comparing(entry -> entry.getKey().length));
+                return Optional.of(frequencies.entrySet().stream().max(comparator).orElseThrow(IllegalStateException::new).getKey());
+
             } else {
-                maxEntry = mapGroupByData.entrySet().stream().
-                        max(Comparator.comparing(entry -> entry.getValue().size()));
-            }
-
-            if (maxEntry.isPresent()) {
-                resultData = maxEntry.get().getValue().get(0);
-
-                return Optional.of(resultData);
+                return maxKeyValueRecord;
             }
         }
 
         return Optional.empty();
     }
 
-    @Override
-    public Set<String> resolveKeys(Set<Set<String>> setOfSetKeys) {
-        Set<String> result = new HashSet<>();
 
-        return setOfSetKeys.stream().reduce(result, Sets::union);
+    @Override
+    public Set<String> resolveKeys(List<Set<String>> setOfSetKeys) {
+        Set<String> result = new HashSet<>();
+        setOfSetKeys.forEach(result::addAll);
+
+        return result;
     }
 }

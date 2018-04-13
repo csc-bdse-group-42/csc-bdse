@@ -31,7 +31,7 @@ public class InMemoryKeyValueApi implements KeyValueApi {
         Require.nonNull(value, "null value");
         map.put(key, value);
 
-        return "OK";
+        return "COMMIT";
     }
 
     @Override

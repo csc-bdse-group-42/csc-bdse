@@ -4,9 +4,7 @@ import feign.Feign;
 import feign.jackson.JacksonDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.csc.bdse.Application;
 import ru.csc.bdse.ApplicationProperties;
-import ru.csc.bdse.controller.PublicKeyValueApiController;
 import ru.csc.bdse.model.KeyValueRecord;
 import ru.csc.bdse.resolver.Resolver;
 
@@ -99,7 +97,7 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
                     ));
         }
 
-        Set<KeyValueRecord> allRecords = new HashSet<>();
+        List<KeyValueRecord> allRecords = new ArrayList<>();
 
         for (Future<KeyValueRecord> future : futures) {
             KeyValueRecord record;
@@ -148,7 +146,7 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
                     ));
         }
 
-        Set<Set<String>> records = new HashSet<>();
+        List<Set<String>> records = new ArrayList<>();
 
         for (Future<Set<String>> future : futures) {
             Set<String> keys;

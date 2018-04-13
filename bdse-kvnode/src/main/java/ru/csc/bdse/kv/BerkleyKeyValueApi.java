@@ -1,6 +1,5 @@
 package ru.csc.bdse.kv;
 
-import com.sleepycat.je.DatabaseException;
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
