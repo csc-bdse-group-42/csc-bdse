@@ -11,28 +11,26 @@ import static java.util.stream.Collectors.counting;
 public class Resolver implements ConflictResolver {
     @Override
     public Optional<KeyValueRecord> resolve(List<KeyValueRecord> allKeyValueRecords) {
-        Set<KeyValueRecord> keyValueRecords = allKeyValueRecords.stream().filter(r -> !r.isDeleted()).collect(Collectors.toCollection(HashSet::new));
+        Set<KeyValueRecord> keyValueRecords = new HashSet<>(allKeyValueRecords);
 
-        Optional<KeyValueRecord> maxKeyValueRecord = keyValueRecords.stream().max(Comparator.comparing(KeyValueRecord::getTimestamp));
-
+        Optional<KeyValueRecord> maxKeyValueRecord = keyValueRecords.stream()
+                .max(Comparator.comparing(KeyValueRecord::getTimestamp));
 
         if (maxKeyValueRecord.isPresent()) {
             long maxTime = maxKeyValueRecord.get().getTimestamp();
-            long elementsWithMaxTime = keyValueRecords.stream().filter(t -> t.getTimestamp() == maxTime).count();
+            Set<KeyValueRecord> elementsWithMaxTime = keyValueRecords.stream()
+                    .filter(t -> t.getTimestamp() == maxTime)
+                    .collect(Collectors.toSet());
 
-            if (elementsWithMaxTime > 1) {
-                final Map<KeyValueRecord, Long> frequencies = keyValueRecords.stream()
-                        .filter(t -> t.getTimestamp() == maxTime)
-                        .collect(Collectors.groupingBy(Function.identity(), counting()));
+            if (elementsWithMaxTime.size() > 1) {
+                final Comparator<KeyValueRecord> comparator = Comparator
+                        .comparingLong(KeyValueRecord::getTimestamp)
+                        .thenComparing(KeyValueRecord::hashCode);
 
-                final Comparator<Map.Entry<KeyValueRecord, Long>> comparator = Comparator
-                        .comparingLong((Map.Entry<KeyValueRecord, Long> e) -> e.getKey().getTimestamp())
-                        .thenComparingLong(Map.Entry::getValue)
-                        .thenComparing((Map.Entry<KeyValueRecord, Long> e) -> e.getKey().getKey());
+                maxKeyValueRecord = elementsWithMaxTime.stream().max(comparator);
+            }
 
-                return Optional.of(frequencies.entrySet().stream().max(comparator).orElseThrow(IllegalStateException::new).getKey());
-
-            } else {
+            if (!maxKeyValueRecord.orElseThrow(IllegalStateException::new).isDeleted()) {
                 return maxKeyValueRecord;
             }
         }

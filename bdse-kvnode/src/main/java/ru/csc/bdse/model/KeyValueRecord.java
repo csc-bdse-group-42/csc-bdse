@@ -4,6 +4,7 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 @Entity
 public class KeyValueRecord {
@@ -67,5 +68,24 @@ public class KeyValueRecord {
                 ", timestamp=" + timestamp +
                 ", data=" + Arrays.toString(data) +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        KeyValueRecord that = (KeyValueRecord) o;
+        return isDeleted() == that.isDeleted() &&
+                getTimestamp() == that.getTimestamp() &&
+                Objects.equals(getKey(), that.getKey()) &&
+                Arrays.equals(getData(), that.getData());
+    }
+
+    @Override
+    public int hashCode() {
+
+        int result = Objects.hash(getKey(), isDeleted(), getTimestamp());
+        result = 31 * result + Arrays.hashCode(getData());
+        return result;
     }
 }
