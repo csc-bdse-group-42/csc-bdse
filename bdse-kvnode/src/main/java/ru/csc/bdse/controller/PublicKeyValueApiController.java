@@ -1,10 +1,12 @@
 package ru.csc.bdse.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.csc.bdse.kv.ReplicatedKeyValueApi;
 import ru.csc.bdse.model.KeyValueRecord;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -33,7 +35,7 @@ public class PublicKeyValueApiController {
             return record.get().getData();
         }
 
-        throw new IllegalStateException();
+        throw new NoSuchElementException();
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -44,5 +46,11 @@ public class PublicKeyValueApiController {
     @RequestMapping(method = RequestMethod.DELETE, value = "/{key}")
     public void delete(@PathVariable final String key) {
         replicatedKeyValueApi.delete(key);
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handle(NoSuchElementException e) {
+        return Optional.ofNullable(e.getMessage()).orElse("");
     }
 }

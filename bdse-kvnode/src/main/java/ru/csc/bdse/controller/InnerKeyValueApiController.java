@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import ru.csc.bdse.kv.BerkleyKeyValueApi;
 import ru.csc.bdse.kv.KeyValueApi;
 import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
@@ -22,10 +23,10 @@ import java.util.Set;
 @RestController
 @RequestMapping("/key-value-inner")
 public class InnerKeyValueApiController {
-    private final KeyValueApi keyValueApi;
+    private final BerkleyKeyValueApi keyValueApi;
 
     @Autowired
-    public InnerKeyValueApiController(final KeyValueApi keyValueApi) {
+    public InnerKeyValueApiController(final BerkleyKeyValueApi keyValueApi) {
         this.keyValueApi = keyValueApi;
     }
 

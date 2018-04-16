@@ -94,7 +94,7 @@ public class KeyValueApiHttpClient implements KeyValueApi {
 
     @Override
     public Set<NodeInfo> getInfo() {
-        final String url = baseUrl + "/info";
+        final String url = baseUrl + "/key-value/info";
         final ResponseEntity<byte[]> responseEntity = request(url, HttpMethod.GET, Constants.EMPTY_BYTE_ARRAY);
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             return new HashSet<>(Arrays.asList(readAs(responseEntity.getBody(), NodeInfo[].class)));
@@ -105,7 +105,7 @@ public class KeyValueApiHttpClient implements KeyValueApi {
 
     @Override
     public void action(String node, NodeAction action) {
-        final String url = baseUrl + "/action/" + node + "/" + action.name();
+        final String url = baseUrl + "/key-value/action/" + node + "/" + action.name();
         final ResponseEntity<byte[]> responseEntity = request(url, HttpMethod.POST, null);
 
         if (responseEntity.getStatusCode() == HttpStatus.SERVICE_UNAVAILABLE) {

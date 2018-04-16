@@ -37,6 +37,9 @@ public class InMemoryKeyValueApi implements KeyValueApi {
     @Override
     public Optional<KeyValueRecord> get(final String key) {
         Require.nonEmpty(key, "empty key");
+        if (map.containsKey(key)) {
+            return Optional.of(new KeyValueRecord(key, map.get(key)));
+        }
         return Optional.empty();
     }
 

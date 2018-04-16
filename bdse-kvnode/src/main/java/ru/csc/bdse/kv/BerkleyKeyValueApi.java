@@ -43,13 +43,9 @@ public class BerkleyKeyValueApi implements KeyValueApi {
 
         KeyValueRecord record = new KeyValueRecord(key, value);
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
-        KeyValueRecord putRecord = primaryIndex.put(record);
+        primaryIndex.put(record);
 
-        if (putRecord != null){
-            return "COMMIT";
-        }
-
-        return "ABORT";
+        return "COMMIT";
     }
 
     /**
@@ -99,6 +95,9 @@ public class BerkleyKeyValueApi implements KeyValueApi {
 
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
         KeyValueRecord record = primaryIndex.get(key);
+        if (record == null) {
+            return;
+        }
         byte[] value = record.getData();
 
         KeyValueRecord deletedRecord = new KeyValueRecord(key, value, true);

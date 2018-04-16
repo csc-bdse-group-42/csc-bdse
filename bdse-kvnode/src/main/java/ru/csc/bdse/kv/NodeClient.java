@@ -18,10 +18,9 @@ interface NodeClient {
     @Headers("Content-Type: application/json")
     KeyValueRecord getInner(@Param("key") final String key);
 
-    @RequestLine("GET /key-value-inner/")
-    @Headers("Content-Type: application/json")
-    Set<String> getsInner(@RequestParam("prefix") final String prefix);
+    @RequestLine("GET /key-value-inner?prefix={prefix}")
+    Set<String> getsInner(@Param("prefix") final String prefix);
 
-    @RequestMapping("DELETE /key-value-inner/{key}")
-    void delete(@PathVariable final String key);
+    @RequestLine("DELETE /key-value-inner/{key}")
+    void delete(@Param("key") final String key);
 }

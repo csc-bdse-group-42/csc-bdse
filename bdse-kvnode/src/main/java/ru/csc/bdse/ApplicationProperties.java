@@ -3,6 +3,8 @@ package ru.csc.bdse;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+
 @Service
 @ConfigurationProperties("bdse")
 public class ApplicationProperties {
@@ -23,6 +25,9 @@ public class ApplicationProperties {
     public String[] getNodes() {
         // Splits by whitespace and commas.
         // Example: "test, test2,test3" => { "test", "test2", "test3" }
+        if (this.nodes == null) {
+            return new String[] {"http://localhost:8001"};
+        }
         return this.nodes.split("(\\s|,)+");
     }
 
@@ -46,11 +51,11 @@ public class ApplicationProperties {
         this.nodeWCL = nodeWCL;
     }
 
-    public int getNoreRCL() {
+    public int getNodeRCL() {
         return noreRCL;
     }
 
-    public void setNoreRCL(int noreRCL) {
+    public void setNodeRCL(int noreRCL) {
         this.noreRCL = noreRCL;
     }
 }

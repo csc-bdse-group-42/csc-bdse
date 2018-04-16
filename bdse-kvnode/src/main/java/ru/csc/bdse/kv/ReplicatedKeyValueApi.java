@@ -24,7 +24,7 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
         this.nodeUrls = applicationProperties.getNodes();
         this.timeout = applicationProperties.getNodeTimeout();
         this.WCL = applicationProperties.getNodeWCL();
-        this.RCL = applicationProperties.getNoreRCL();
+        this.RCL = applicationProperties.getNodeRCL();
         this.threadPool = Executors.newFixedThreadPool(8);
     }
 
@@ -58,6 +58,7 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
             try {
                 nodeStatus = future.get(this.timeout, TimeUnit.SECONDS);
             } catch (TimeoutException | InterruptedException | ExecutionException e) {
+                e.printStackTrace();
                 nodeStatus = "ABORT";
             }
 
@@ -104,7 +105,12 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
             try {
                 record = future.get(this.timeout * 5, TimeUnit.SECONDS);
             } catch (TimeoutException | InterruptedException | ExecutionException e) {
-                record = null;
+                if (e.getMessage().startsWith("feign.FeignException: status 404")) {
+                    record = new KeyValueRecord(key, null, true);
+                    record.setTimestamp(0);
+                } else {
+                    record = null;
+                }
             }
 
             if (record != null) {
@@ -195,15 +201,11 @@ public class ReplicatedKeyValueApi implements KeyValueApi{
         }
 
         for (Future<String> future : futures) {
-            String message;
             try {
-                message = future.get(this.timeout * 5, TimeUnit.SECONDS);
-            } catch (TimeoutException | InterruptedException | ExecutionException e) {
-                message = null;
-            }
-
-            if (message != null) {
+                future.get(this.timeout * 5, TimeUnit.SECONDS);
                 numberOfOK += 1;
+            } catch (TimeoutException | InterruptedException | ExecutionException e) {
+                e.printStackTrace();
             }
         }
 
