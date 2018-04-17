@@ -57,7 +57,6 @@ public class PhoneBookCompatibilitiesTest {
     }
 
     @Test
-    @Ignore  // TODO: Fix for records marked as deleted
     public void write10erasure11() {
         SoftAssertions softAssert = new SoftAssertions();
         BookRecordV10 recordV1 = new BookRecordV10("Vasya", "Pupkin", "89115467734");

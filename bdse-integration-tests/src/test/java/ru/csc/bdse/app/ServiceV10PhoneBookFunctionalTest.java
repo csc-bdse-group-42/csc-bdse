@@ -8,7 +8,6 @@ import ru.csc.bdse.datasource.BerkleyDataSource;
 import ru.csc.bdse.kv.BerkleyKeyValueApi;
 import ru.csc.bdse.util.Random;
 
-@Ignore  // TODO: Fix for records marked as deleted
 public class ServiceV10PhoneBookFunctionalTest extends AbstractPhoneBookFunctionalTest<BookRecordV10> {
     @Override
     protected PhoneBookApi<BookRecordV10> newPhoneBookApi() {

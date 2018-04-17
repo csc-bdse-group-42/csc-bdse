@@ -92,7 +92,6 @@ public abstract class AbstractKeyValueApiTest {
         softAssert.assertAll();
     }
 
-    @Ignore  // Add cluster info in replicated api
     @Test
     public void getClusterInfoValue() {
         SoftAssertions softAssert = new SoftAssertions();

@@ -10,7 +10,6 @@ import ru.csc.bdse.util.Random;
 
 import java.util.Arrays;
 
-@Ignore  // TODO: Fix for records marked as deleted
 public class ServiceV11PhoneBookFunctionalTest extends AbstractPhoneBookFunctionalTest<BookRecordV11> {
     @Override
     protected PhoneBookApi<BookRecordV11> newPhoneBookApi() {
