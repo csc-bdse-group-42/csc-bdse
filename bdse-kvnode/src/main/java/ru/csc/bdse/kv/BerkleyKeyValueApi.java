@@ -74,10 +74,10 @@ public class BerkleyKeyValueApi implements KeyValueApi {
 
         Set<String> keys = new HashSet<>();
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
-        try (EntityCursor<String> cursor = primaryIndex.keys()) {
-            for (String key : cursor) {
-                if (key.startsWith(prefix)) {
-                    keys.add(key);
+        try (EntityCursor<KeyValueRecord> entities = primaryIndex.entities()) {
+            for (KeyValueRecord record : entities) {
+                if (record.getKey().startsWith(prefix) && !record.isDeleted()) {
+                    keys.add(record.getKey());
                 }
             }
         }

@@ -16,7 +16,6 @@ import static java.time.temporal.ChronoUnit.SECONDS;
  *
  * @author alesavin
  */
-@Ignore  // TODO: add node manipulation to replicated api
 public class KeyValueApiHttpClientNonFunctionalTest {
 
     @ClassRule
