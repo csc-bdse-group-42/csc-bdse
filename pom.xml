@@ -43,7 +43,7 @@
 			<dependency>
 				<groupId>ru.csc</groupId>
 				<artifactId>bdse-kvnode</artifactId>
-				<version>0.0.1-SNAPSHOT</version>
+				<version>0.0.2-SNAPSHOT</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -82,6 +82,28 @@
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java</artifactId>
 			<version>3.5.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-feign</artifactId>
+			<version>1.4.3.RELEASE</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-okhttp</artifactId>
+			<version>9.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-jackson</artifactId>
+			<version>9.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-slf4j</artifactId>
+			<version>9.3.1</version>
 		</dependency>
 
 	</dependencies>

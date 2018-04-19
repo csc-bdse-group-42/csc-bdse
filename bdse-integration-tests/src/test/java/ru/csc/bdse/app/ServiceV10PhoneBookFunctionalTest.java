@@ -1,5 +1,6 @@
 package ru.csc.bdse.app;
 
+import org.junit.Ignore;
 import ru.csc.bdse.ApplicationProperties;
 import ru.csc.bdse.app.v10.model.BookRecordV10;
 import ru.csc.bdse.app.v10.service.PhoneBookServiceV10;
