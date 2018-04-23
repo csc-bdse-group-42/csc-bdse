@@ -24,7 +24,6 @@ public class BerkleyDataSource {
     @Autowired
     public BerkleyDataSource(ApplicationProperties applicationProperties) {
         String dbFilename = applicationProperties.getDbfile();
-
         try{
             if (Files.notExists(Paths.get(dbFilename))) {
                 Files.createDirectories(Paths.get(dbFilename));

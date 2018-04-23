@@ -1,6 +1,5 @@
 package ru.csc.bdse.kv;
 
-import com.sleepycat.je.DatabaseException;
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
@@ -36,7 +35,7 @@ public class BerkleyKeyValueApi implements KeyValueApi {
      * Puts value to the storage by specified key.
      */
     @Override
-    public void put(String key, byte[] value) {
+    public String put(String key, byte[] value) {
         Require.nonNull(key, "null key");
         Require.nonNull(value, "null value");
 
@@ -45,13 +44,15 @@ public class BerkleyKeyValueApi implements KeyValueApi {
         KeyValueRecord record = new KeyValueRecord(key, value);
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
         primaryIndex.put(record);
+
+        return "COMMIT";
     }
 
     /**
      * Returns value associated with specified key.
      */
     @Override
-    public Optional<byte[]> get(String key) {
+    public Optional<KeyValueRecord> get(String key) {
         Require.nonNull(key, "null key");
 
         this.checkNodeStatus();
@@ -61,7 +62,7 @@ public class BerkleyKeyValueApi implements KeyValueApi {
         if (record == null) {
             return Optional.empty();
         }
-        return Optional.of(record.getData());
+        return Optional.of(record);
     }
 
     /**
@@ -73,10 +74,10 @@ public class BerkleyKeyValueApi implements KeyValueApi {
 
         Set<String> keys = new HashSet<>();
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
-        try (EntityCursor<String> cursor = primaryIndex.keys()) {
-            for (String key : cursor) {
-                if (key.startsWith(prefix)) {
-                    keys.add(key);
+        try (EntityCursor<KeyValueRecord> entities = primaryIndex.entities()) {
+            for (KeyValueRecord record : entities) {
+                if (record.getKey().startsWith(prefix) && !record.isDeleted()) {
+                    keys.add(record.getKey());
                 }
             }
         }
@@ -93,7 +94,14 @@ public class BerkleyKeyValueApi implements KeyValueApi {
         this.checkNodeStatus();
 
         PrimaryIndex<String, KeyValueRecord> primaryIndex = getPrimaryIndex();
-        primaryIndex.delete(key);
+        KeyValueRecord record = primaryIndex.get(key);
+        if (record == null) {
+            return;
+        }
+        byte[] value = record.getData();
+
+        KeyValueRecord deletedRecord = new KeyValueRecord(key, value, true);
+        primaryIndex.put(deletedRecord);
     }
 
     /**

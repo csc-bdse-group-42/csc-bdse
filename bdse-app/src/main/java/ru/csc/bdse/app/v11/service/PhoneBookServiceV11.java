@@ -9,6 +9,7 @@ import ru.csc.bdse.app.RecordBookProtos;
 import ru.csc.bdse.app.util.NameAndSurnameCannotContainAtException;
 import ru.csc.bdse.app.v11.model.BookRecordV11;
 import ru.csc.bdse.kv.BerkleyKeyValueApi;
+import ru.csc.bdse.model.KeyValueRecord;
 import ru.csc.bdse.util.Require;
 
 import java.io.ByteArrayInputStream;
@@ -85,14 +86,15 @@ public class PhoneBookServiceV11 implements PhoneBookApi<BookRecordV11> {
                     .map(berkleyKeyValueApi::get)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
-                    .forEach(bytes -> surnameKeys.add(new String(bytes)));
+                    .forEach(bytes -> surnameKeys.add(new String(bytes.getData())));
 
         for (String key : surnameKeys) {
-            Optional<byte[]> bytes = berkleyKeyValueApi.get(key);
+            Optional<KeyValueRecord> record = berkleyKeyValueApi.get(key);
 
-            if (bytes.isPresent()) {
+            if (record.isPresent()) {
+                byte[] bytes = record.get().getData();
                 try {
-                    RecordBookProtos.Person person = RecordBookProtos.Person.parseFrom(new ByteArrayInputStream(bytes.get()));
+                    RecordBookProtos.Person person = RecordBookProtos.Person.parseFrom(new ByteArrayInputStream(bytes));
                     BookRecordV11 recordV2 = new BookRecordV11(person.getFirstName(), person.getSecondName(),
                                 person.getNickname(), person.getPhonesList());
                     bookRecords.add(recordV2);

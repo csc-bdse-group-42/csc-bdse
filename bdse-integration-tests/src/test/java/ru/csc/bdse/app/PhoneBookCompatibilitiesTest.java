@@ -3,6 +3,7 @@ package ru.csc.bdse.app;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import ru.csc.bdse.ApplicationProperties;
 import ru.csc.bdse.app.v10.model.BookRecordV10;

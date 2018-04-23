@@ -14,6 +14,7 @@
         <dependency>
             <groupId>ru.csc</groupId>
             <artifactId>bdse-kvnode</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ru.csc</groupId>
