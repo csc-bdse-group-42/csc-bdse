@@ -8,7 +8,10 @@ import ru.csc.bdse.partitioning.PartitionCoordinator;
 import ru.csc.bdse.partitioning.Partitioner;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -36,12 +39,10 @@ public class PartitionedKeyValueApi implements KeyValueApi {
         Partitioner partitioner = applicationProperties.getPartitioner();
 
         this.coordinator = new PartitionCoordinator(partitionList, partitioner, timeout);
-        this.threadPool = Executors.newFixedThreadPool(8);
     }
 
     PartitionedKeyValueApi(List<KeyValueApi> partitionList, int timeout, Partitioner partitioner) {
         this.coordinator = new PartitionCoordinator(partitionList, partitioner, timeout);
-        this.threadPool = Executors.newFixedThreadPool(8);
     }
 
     @Override
@@ -52,17 +53,17 @@ public class PartitionedKeyValueApi implements KeyValueApi {
 
     @Override
     public Optional<KeyValueRecord> get(String key) {
-        return Optional.empty();
+        return coordinator.get(key);
     }
 
     @Override
     public Set<String> getKeys(String prefix) {
-        return null;
+        return coordinator.getKeys(prefix);
     }
 
     @Override
     public void delete(String key) {
-
+        coordinator.delete(key);
     }
 
     @Override
