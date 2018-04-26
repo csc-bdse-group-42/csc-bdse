@@ -3,7 +3,6 @@ package ru.csc.bdse.partitioning;
 import feign.Feign;
 import feign.jackson.JacksonDecoder;
 import ru.csc.bdse.kv.KeyValueApi;
-import ru.csc.bdse.kv.KeyValueApiHttpClient;
 import ru.csc.bdse.kv.NodeClient;
 import ru.csc.bdse.model.KeyValueRecord;
 

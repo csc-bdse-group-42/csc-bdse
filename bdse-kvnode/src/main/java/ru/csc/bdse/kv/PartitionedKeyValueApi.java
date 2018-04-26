@@ -19,7 +19,6 @@ import java.util.concurrent.Executors;
 public class PartitionedKeyValueApi implements KeyValueApi {
 
     private PartitionCoordinator coordinator;
-    private ExecutorService threadPool;
 
     /**
      * @throws ClassNotFoundException - if partitioner from properties not found
@@ -72,7 +71,5 @@ public class PartitionedKeyValueApi implements KeyValueApi {
     }
 
     @Override
-    public void action(String node, NodeAction action) {
-
-    }
+    public void action(String node, NodeAction action) { }
 }
