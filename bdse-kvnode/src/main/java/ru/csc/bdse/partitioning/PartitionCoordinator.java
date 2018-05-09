@@ -55,7 +55,7 @@ public class PartitionCoordinator {
         }
     }
 
-    public Optional<KeyValueRecord> get(String key) {
+    public Optional<KeyValueRecord> get(String key) throws InterruptedException, ExecutionException, TimeoutException {
         String nodeUrl = partitioner.getPartition(key);
         Future<KeyValueRecord> future = CompletableFuture.supplyAsync(
                 () -> {
@@ -73,7 +73,7 @@ public class PartitionCoordinator {
                 record = new KeyValueRecord(key, null, true);
                 record.setTimestamp(0);
             } else {
-                record = null;
+                throw e;
             }
         }
 

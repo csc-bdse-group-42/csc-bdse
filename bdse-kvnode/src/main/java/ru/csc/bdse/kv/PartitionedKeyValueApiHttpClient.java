@@ -1,5 +1,7 @@
 package ru.csc.bdse.kv;
 
+import feign.Feign;
+import feign.jackson.JacksonDecoder;
 import ru.csc.bdse.model.KeyValueRecord;
 
 import java.util.ArrayList;
@@ -8,79 +10,36 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class PartitionedKeyValueApiHttpClient {
-    private List<KeyValueApi> nodes;
+public class PartitionedKeyValueApiHttpClient implements KeyValueApi{
+    private PartitionedClient client;
 
-    public PartitionedKeyValueApiHttpClient(List<String> baseUrls) {
-        nodes = new ArrayList<>();
-        for (String baseUrl : baseUrls) {
-            nodes.add(new KeyValueApiHttpClient(baseUrl));
-        }
+    public PartitionedKeyValueApiHttpClient(String baseUrl) {
+        client = Feign.builder().decoder(new JacksonDecoder()).target(PartitionedClient.class, baseUrl);
     }
 
     public String put(String key, byte[] value) {
-        for (int i = 0; i < nodes.size(); ++i) {
-            try {
-                nodes.get(i).put(key, value);
-                return "COMMIT";
-            } catch (Exception e) {
-                System.err.printf("Access error for node %d\n", i);
-                e.printStackTrace();
-            }
-        }
-
-        throw new IllegalStateException("None of nodes answered");
+        return client.put(key, value);
     }
-    
-    public Optional<KeyValueRecord> get(String key) {
-        Optional<KeyValueRecord> record;
-        for (int i = 0; i < nodes.size(); ++i) {
-            try {
-                record = nodes.get(i).get(key);
-                if (record.isPresent()) {
-                    return record;
-                }
-            } catch (Exception e) {
-                System.err.printf("Access error for node %d\n", i);
-                e.printStackTrace();
-            }
-        }
 
-        throw new IllegalStateException("None of nodes answered");
+    public Optional<KeyValueRecord> get(String key) {
+        return Optional.of(client.get(key));
     }
 
     public Set<String> getKeys(String prefix) {
-        Set<String> allKeys = new HashSet<>();
-        for (int i = 0; i < nodes.size(); ++i) {
-            try {
-                allKeys.addAll(nodes.get(i).getKeys(prefix));
-            } catch (Exception e) {
-                System.err.printf("Access error for node %d\n", i);
-                e.printStackTrace();
-            }
-        }
-        return allKeys;
+        return client.find(prefix);
     }
 
     public void delete(String key) {
-        for (int i = 0; i < nodes.size(); ++i) {
-            try {
-                nodes.get(i).delete(key);
-            } catch (Exception e) {
-                System.err.printf("Access error for node %d\n", i);
-                e.printStackTrace();
-            }
-        }
+        client.delete(key);
     }
 
-    public void action(String node, NodeAction action) {
-        for (int i = 0; i < nodes.size(); ++i) {
-            try {
-                nodes.get(i).action(node, action);
-            } catch (Exception e) {
-                System.err.printf("Access error for node %d\n", i);
-                e.printStackTrace();
-            }
-        }
+    public Set<NodeInfo> getInfo() {
+        return client.getInfo();
     }
+
+    @Override
+    public void action(String node, NodeAction action) {
+        throw new RuntimeException("not implemented");
+    }
+
 }

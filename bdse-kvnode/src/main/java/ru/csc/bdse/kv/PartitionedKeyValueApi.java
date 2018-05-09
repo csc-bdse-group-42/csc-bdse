@@ -8,17 +8,18 @@ import ru.csc.bdse.partitioning.PartitionCoordinator;
 import ru.csc.bdse.partitioning.Partitioner;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 @Service
-public class PartitionedKeyValueApi implements KeyValueApi {
+public class PartitionedKeyValueApi {
 
     private PartitionCoordinator coordinator;
+    private List<KeyValueApi> partitionList;
 
     /**
      * @throws ClassNotFoundException - if partitioner from properties not found
@@ -31,7 +32,7 @@ public class PartitionedKeyValueApi implements KeyValueApi {
     PartitionedKeyValueApi(ApplicationProperties applicationProperties) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         int timeout = applicationProperties.getNodeTimeout();
 
-        List<KeyValueApi> partitionList = new ArrayList<>();
+        partitionList = new ArrayList<>();
         for (String partitionUrl : applicationProperties.getPartitions()) {
             partitionList.add(new KeyValueApiHttpClient(partitionUrl));
         }
@@ -40,36 +41,43 @@ public class PartitionedKeyValueApi implements KeyValueApi {
         this.coordinator = new PartitionCoordinator(partitionList, partitioner, timeout);
     }
 
-    PartitionedKeyValueApi(List<KeyValueApi> partitionList, int timeout, Partitioner partitioner) {
+    PartitionedKeyValueApi(Set<String> partitionUrls, int timeout, Partitioner partitioner) {
+        List<String> urlList = new ArrayList<>(partitionUrls);
+        Collections.sort(urlList);
+
+        partitionList = new ArrayList<>();
+        for (String partitionUrl : urlList) {
+            partitionList.add(new KeyValueApiHttpClient(partitionUrl));
+        }
         this.coordinator = new PartitionCoordinator(partitionList, partitioner, timeout);
     }
 
-    @Override
-    public String put(String key, byte[] value) {
+    public void put(String key, byte[] value) {
         coordinator.put(key, value);
-        return "COMMIT";
     }
 
-    @Override
     public Optional<KeyValueRecord> get(String key) {
-        return coordinator.get(key);
+        try {
+            return coordinator.get(key);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            return Optional.empty();
+        }
     }
 
-    @Override
     public Set<String> getKeys(String prefix) {
         return coordinator.getKeys(prefix);
     }
 
-    @Override
     public void delete(String key) {
         coordinator.delete(key);
     }
 
-    @Override
     public Set<NodeInfo> getInfo() {
-        return null;
+        return partitionList.stream()
+                .map(KeyValueApi::getInfo)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 
-    @Override
     public void action(String node, NodeAction action) { }
 }
