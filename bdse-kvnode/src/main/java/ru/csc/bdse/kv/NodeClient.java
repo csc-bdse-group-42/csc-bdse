@@ -10,7 +10,7 @@ import ru.csc.bdse.model.KeyValueRecord;
 
 import java.util.Set;
 
-interface NodeClient {
+public interface NodeClient {
     @RequestLine("PUT /key-value-inner/{key}")
     String putInner(@Param("key") final String key, final byte[] value);
 

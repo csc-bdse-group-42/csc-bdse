@@ -2,8 +2,12 @@ package ru.csc.bdse;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
+import ru.csc.bdse.partitioning.Partitioner;
 
-import java.util.Arrays;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @ConfigurationProperties("bdse")
@@ -12,7 +16,11 @@ public class ApplicationProperties {
     private String nodes;
     private int nodeTimeout;
     private int nodeWCL;
-    private int noreRCL;
+    private int nodeRCL;
+    private String partitions;
+    private String partitioner;
+
+    private Partitioner partitionerInstance = null;
 
     public String getDbfile() {
         return dbfile;
@@ -26,13 +34,47 @@ public class ApplicationProperties {
         // Splits by whitespace and commas.
         // Example: "test, test2,test3" => { "test", "test2", "test3" }
         if (this.nodes == null) {
-            return new String[] {"http://localhost:8001"};
+            return new String[]{"http://localhost:8001"};
         }
         return this.nodes.split("(\\s|,)+");
     }
 
     public void setNodes(String nodes) {
         this.nodes = nodes;
+    }
+
+    public String[] getPartitions() {
+        // Splits by whitespace and commas.
+        // Example: "test, test2,test3" => { "test", "test2", "test3" }
+        if (this.partitions == null) {
+            return new String[]{"http://localhost:8001"};
+        }
+        return this.partitions.split("(\\s|,)+");
+    }
+
+    public void setPartitions(String partitions) {
+        this.partitions = partitions;
+    }
+
+    public Partitioner getPartitioner() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
+            InvocationTargetException, InstantiationException {
+        if (this.partitionerInstance != null) {
+            return this.partitionerInstance;
+        }
+
+        Class<? extends Partitioner> partitionerClass = Class.forName(
+                "ru.csc.bdse.partitioning." + this.partitioner
+        ).asSubclass(Partitioner.class);
+
+        Set<String> partitions = new HashSet<>();
+        Collections.addAll(partitions, this.getPartitions());
+        this.partitionerInstance = partitionerClass.getDeclaredConstructor(Set.class).newInstance(partitions);
+
+        return this.partitionerInstance;
+    }
+
+    public void setPartitioner(String partitioneer) {
+        this.partitioner = partitioneer;
     }
 
     public int getNodeTimeout() {
@@ -52,10 +94,10 @@ public class ApplicationProperties {
     }
 
     public int getNodeRCL() {
-        return noreRCL;
+        return nodeRCL;
     }
 
-    public void setNodeRCL(int noreRCL) {
-        this.noreRCL = noreRCL;
+    public void setNodeRCL(int nodeRCL) {
+        this.nodeRCL = nodeRCL;
     }
 }
